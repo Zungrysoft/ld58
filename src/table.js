@@ -41,7 +41,6 @@ export default class Table extends Thing {
   activePlayer = 'p1'
   playerWin = null
   winFromRunOut = false
-  victoryTime = 0
   movesLeft = 2
 
   constructor (levelData) {
@@ -218,6 +217,7 @@ export default class Table extends Thing {
     if (game.mouse.leftClick && selectedMarble < this.getActiveInventory().length && selectedMarble >= 0) {
       this.setPhase('positioning');
       this.pickedMarbleIndex = selectedMarble;
+      soundmanager.playSound('pick', 1.0, 1.0)
     }
   }
 
@@ -245,6 +245,7 @@ export default class Table extends Thing {
       this.readyToShoot = false; // Wait until player releases LMB before starting shot
       this.shootPower = 0;
       this.viewPositionTargetShooting = this.selectedShootPosition;
+      soundmanager.playSound('place', 0.8, 1);
 
       // Add platform and marble
       this.shootingPlatform = game.addThing(new Structure('platform', null, this.selectedShootPosition));
@@ -276,7 +277,11 @@ export default class Table extends Thing {
       this.readyToShoot = true;
     }
 
-    if (game.mouse.leftButton && this.readyToShoot) {
+    if (game.mouse.leftButton && this.readyToShoot && this.shootPower < SHOOT_TIME) {
+      if ((SHOOT_TIME - this.shootPower) % 5 === 0) {
+        const pitch = u.map(this.shootPower, 0, SHOOT_TIME, 1.0, 2.0);
+        soundmanager.playSound('aim', 0.9, pitch);
+      }
       this.shootPower ++;
     }
 
@@ -348,13 +353,18 @@ export default class Table extends Thing {
   }
 
   updateVictory() {
-    this.victoryTime ++;
+    const isDefeat = this.isSingleplayer && this.playerWin === 'p2';
 
-    if (this.victoryTime < 60*3 && this.victoryTime % 8 === 0) {
-      game.addThing(new CollectedMarble('goal_' + this.playerWin, this.isSingleplayer && this.playerWin === 'p2' ? 'defeat' : 'victory'));
+    if (this.phaseTime === 2) {
+      soundmanager.playSound(isDefeat ? 'defeat' : 'victory', 1, 1);
     }
 
-    if (this.victoryTime > 60*3 && game.mouse.leftClick) {
+
+    if (this.phaseTime < 60*3 && this.phaseTime % 8 === 0) {
+      game.addThing(new CollectedMarble('goal_' + this.playerWin, isDefeat ? 'defeat' : 'victory'));
+    }
+
+    if (this.phaseTime > 60*3 && game.mouse.leftClick) {
       game.addThing(new StageSelectMenu(!this.isSingleplayer))
       this.cleanUp()
     }
@@ -506,7 +516,7 @@ export default class Table extends Thing {
         hintText,
         50, textColor, [0, 30], [0, 0]
       )
-      if (this.victoryTime > 60*5) {
+      if (this.phase === 'victory' && this.phaseTime > 60*5) {
         drawText(
           'Click to exit',
           60, textColor, [0, 220], [0, 0]

@@ -34,10 +34,12 @@ export default class MainMenu extends Menu {
   menuEvent(action) {
     if (action === 'singleplayer') {
       this.isDead = true;
+      this.playClickSound();
       game.addThing(new StageSelectMenu())
     }
     if (action === 'multiplayer') {
       this.isDead = true;
+      this.playClickSound();
       game.addThing(new StageSelectMenu(true))
     }
   }

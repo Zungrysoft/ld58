@@ -35,10 +35,12 @@ export default class StageSelectMenu extends Menu {
   menuEvent(action) {
     if (action === 'back') {
       this.isDead = true;
+      this.playBackSound();
       game.addThing(new MainMenu())
     }
     else {
       this.isDead = true
+      this.playClickSound();
       game.addThing(new Table(game.assets.data.stages[action]))
     }
   }

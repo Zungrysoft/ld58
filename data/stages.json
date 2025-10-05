@@ -14,7 +14,8 @@
             { "type": "basic", "position": [0, -2.5, 0] },
             { "type": "basic", "position": [0, -1.5, 0] },
             { "type": "basic", "position": [0, -5.5, 0] },
-            { "type": "shock", "position": [-4.0, -1, 0] }
+            { "type": "shock", "position": [-4.0, -1, 0] },
+            { "type": "bonus", "position": [-4.0, 0, 0] }
         ],
         "marbleSymmetry": "rotate",
         "marbleCollection": [

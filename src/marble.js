@@ -23,7 +23,7 @@ export function getMarbleScale(type) {
     return 0.72;
   }
   if (type === 'bonus') {
-    return 0.46;
+    return 0.5;
   }
   if (type === 'heavy') {
     return 0.9;
@@ -143,12 +143,16 @@ export default class Marble extends Thing {
         game.addThing(new SmokeParticle(vec3.add(this.position, smokePos), 2))
       }
       this.isMarkedForDeath = true;
+
+      soundmanager.playSound('hiss', 1, 1);
     }
   }
 
   sendShockWave() {
     this.isMarkedForDeath = true;
     const ph = game.getThing('table').physicsHandler;
+
+    soundmanager.playSound('explode', 1, 1);
 
     // Send other marbles away
     for (const marble of game.getThings().filter(x => x instanceof Marble)) {
@@ -164,11 +168,18 @@ export default class Marble extends Thing {
   }
 
   collect() {
-    for (let i = 0; i < 15; i ++) {
-      game.addThing(new CollectParticle(this.position, this.type))
+    if (this.isShot) {
+      soundmanager.playSound('bad', 1, 1);
     }
+    else {
+      soundmanager.playSound('collect', 1, 1);
+      for (let i = 0; i < 15; i ++) {
+        game.addThing(new CollectParticle(this.position, this.type))
+      }
 
-    game.getThing('table').addMarble(this.type);
+      game.getThing('table').addMarble(this.type);
+    }
+    
 
     this.kill();
   }

@@ -48,6 +48,14 @@ export default class Menu extends Thing {
 
   menuEvent() {}
 
+  playClickSound() {
+    soundmanager.playSound('menu2', 1, 1);
+  }
+
+  playBackSound() {
+    soundmanager.playSound('menu', 1, 1);
+  }
+
   getSelectedButton() {
     const yTop = game.mouse.position[1] - BUTTON_HEADER + 40;
     if (yTop > 0 && yTop < BUTTON_SPACING * this.buttonsPerColumn ) {

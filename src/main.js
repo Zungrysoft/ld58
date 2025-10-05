@@ -51,6 +51,22 @@ await game.loadAssets({
   sounds: {
     hitMarble: 'sounds/hit_marble.wav',
     hitTable: 'sounds/hit_table.wav',
+    place: 'sounds/place.wav',
+    pick: 'sounds/pick.wav',
+
+    bad: 'sounds/bad.wav',
+    break: 'sounds/break.wav',
+    collect: 'sounds/collect.wav',
+    explode: 'sounds/explode.wav',
+    extra_turn: 'sounds/extra_turn.wav',
+    hiss: 'sounds/hiss.wav',
+    zap: 'sounds/zap.wav',
+    menu: 'sounds/menu.wav',
+    menu2: 'sounds/menu2.wav',
+    transform: 'sounds/transform.wav',
+    victory: 'sounds/victory.wav',
+    defeat: 'sounds/defeat.wav',
+    aim: 'sounds/aim.wav',
   },
 
   data: {

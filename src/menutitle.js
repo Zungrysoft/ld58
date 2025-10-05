@@ -53,6 +53,7 @@ export default class TitleMenu extends Menu {
   menuEvent(action) {
     if (action === 'start') {
       this.isDead = true;
+      this.playClickSound();
       game.addThing(new MainMenu())
     }
   }
@@ -69,6 +70,7 @@ export default class TitleMenu extends Menu {
       if (Math.random() < 0.08) {marbleType = 'fire'}
       if (Math.random() < 0.05) {marbleType = 'metal'}
       if (Math.random() < 0.1) {marbleType = 'shock'}
+      if (Math.random() < 0.16) {marbleType = 'bonus'}
 
       game.addThing(new CollectedMarble(marbleType, 'victory'));
     }
