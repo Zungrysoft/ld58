@@ -15,6 +15,8 @@ import SparkParticle from './particleSpark.js'
 export const MARBLE_STOP_THRESHOLD = 0.04;
 
 export const FIRE_MARBLE_SPEED_THRESHOLD = 1.8;
+export const SHOCK_FORCE = 15;
+export const SHOCK_RANGE = 3;
 
 export function getMarbleScale(type) {
   if (type.includes('goal')) {
@@ -35,7 +37,10 @@ export function getMarbleScale(type) {
 
 export function getMarbleDensity(type) {
   if (type.includes('goal')) {
-    return 1.02;
+    return 1.1;
+  }
+  if (type.includes('metal')) {
+    return 20;
   }
   return 1.0;
 }
@@ -114,7 +119,7 @@ export default class Marble extends Thing {
       }
     }
 
-    if (this.isBurnt) {
+    if (this.isMarkedForDeath) {
       this.kill();
     }
   }
@@ -137,7 +142,24 @@ export default class Marble extends Thing {
         ]
         game.addThing(new SmokeParticle(vec3.add(this.position, smokePos), 2))
       }
-      this.isBurnt = true;
+      this.isMarkedForDeath = true;
+    }
+  }
+
+  sendShockWave() {
+    this.isMarkedForDeath = true;
+    const ph = game.getThing('table').physicsHandler;
+
+    // Send other marbles away
+    for (const marble of game.getThings().filter(x => x instanceof Marble)) {
+      let dist = vec3.magnitude(vec3.subtract(this.position, marble.position))
+      if (dist < SHOCK_RANGE) {
+        const impulseForce = u.map(dist, 0, SHOCK_RANGE, SHOCK_FORCE, 0, true);
+        const impulseDirection = vec3.normalize(vec3.subtract(marble.position, this.position));
+        const impulse = vec3.scale(impulseDirection, impulseForce);
+
+        ph.applyImpulse(marble, impulse);
+      }
     }
   }
 
@@ -159,6 +181,21 @@ export default class Marble extends Thing {
     }
   }
 
+  unfreeze() {
+    if (this.isFrozen) {
+      this.isFrozen = false;
+      this.shouldBeFrozen = false;
+      game.getThing('table').physicsHandler.unfreezeMarble(this);
+    }
+  }
+
+  checkForFreeze() {
+    if (this.shouldBeFrozen && !this.isFrozen) {
+      this.isFrozen = true;
+      game.getThing('table').physicsHandler.freezeMarble(this);
+    }
+  }
+
   draw () {
     // Don't render if destroyed
     if (this.destroyed) {
@@ -170,6 +207,9 @@ export default class Marble extends Thing {
 
     // Texture
     let rTexture = assets.textures['uv_marble_' + this.type] ?? assets.textures.square;
+    if (this.isFrozen) {
+      rTexture = assets.textures['uv_marble_rock'];
+    }
 
     // Position
     let rPos = this.position;
@@ -195,7 +235,7 @@ export default class Marble extends Thing {
       scale: rScale,
       color: rColor,
       glow: rGlow,
-      unshaded: getMarbleUnshaded(this.type),
+      unshaded: getMarbleUnshaded(this.type) && !this.isFrozen,
     })
   }
 }

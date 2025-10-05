@@ -11,6 +11,7 @@ export default class SandParticle extends Thing {
   windScale = 0.03
   position = [0, 0, 0]
   time = 0
+  isThemeParticle = true;
 
   constructor () {
     super()
@@ -24,7 +25,7 @@ export default class SandParticle extends Thing {
 
   update () {
     this.time ++
-    const boardTime = game.getThing('table').time || 0
+    const boardTime = game.getThing('background').time || 0
 
     // Move
     this.position = vec3.add(this.position, [-0.06, -0.006, 0.025])

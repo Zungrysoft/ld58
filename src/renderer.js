@@ -103,7 +103,7 @@ export default class Renderer extends Thing {
   postDraw () {
     super.postDraw()
 
-    let table = game.getThing('table')
+    let table = game.getThing('background')
     let fogDistance = theme.getTheme(table.theme).fogDistance
     let fogColor = theme.getTheme(table.theme).fogColor
 

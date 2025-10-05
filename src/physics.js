@@ -174,20 +174,35 @@ export default class MarblePhysicsHandler {
         }
       }
       else if (massA !== 0 && massB !== 0) {
-        if (self.id < other.id) {
-          const dt = 1 / 60;
-          const force = Math.abs(relativeVelocity) * (massA * massB) / (massA + massB) / dt;
-          if (force > 10) {
+        const dt = 1 / 60;
+        const force = Math.abs(relativeVelocity) * (massA * massB) / (massA + massB) / dt;
+
+        if (force > 10) {
+          if (self.id < other.id) {
             soundmanager.playSound(
               'hitMarble',
               u.map(force, 0, 1000, 0, 1, true),
               u.map(force, 0, 2000, 0.5, 1.1, true),
             );
           }
+
+          // if (!selfObj.shouldBeFrozen) {
+          //   console.log(`Froze ${selfObj.type} marble - collided with ${otherObj.type} with force ${force}`)
+          // }
+          // if (!otherObj.shouldBeFrozen) {
+          //   console.log(`Froze ${otherObj.type} marble - collided with ${selfObj.type} with force ${force}`)
+          // }
+
+          selfObj.shouldBeFrozen = true;
+          otherObj.shouldBeFrozen = true;
         }
 
         if (selfObj.isOnFire()) {
           otherObj.burnUp();
+        }
+
+        if (selfObj.type === 'shock' && selfObj.isShot) {
+          selfObj.sendShockWave();
         }
       }
     });
@@ -209,6 +224,20 @@ export default class MarblePhysicsHandler {
 
     // Apply impulse through center of mass (no torque)
     body.applyImpulse(impulseVec, body.position);
+  }
+
+  freezeMarble(marbleObj) {
+    const body = this.marbles.get(marbleObj);
+
+    body.mass = 0;
+    body.updateMassProperties();
+  }
+
+  unfreezeMarble(marbleObj) {
+    const body = this.marbles.get(marbleObj);
+
+    body.mass = marbleObj.getMass();
+    body.updateMassProperties();
   }
 
   addStructure(structureObj) {

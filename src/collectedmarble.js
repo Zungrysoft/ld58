@@ -39,12 +39,12 @@ export default class CollectedMarble extends Thing {
     }
     else {
       this.position = [
-        6 - Math.random()*3,
+        -6 + Math.random()*3,
         -10.4,
         -6.7,
       ]
       this.velocity = [
-        0.04 + Math.random()*0.04,
+        -0.04 - Math.random()*0.04,
         0,
         0.6 + Math.random() * 0.08,
       ]
@@ -52,6 +52,7 @@ export default class CollectedMarble extends Thing {
     
 
     this.rotation = [Math.random() * Math.PI, Math.random() * Math.PI, 0];
+    this.avel = [Math.random() * 0.04, Math.random() * 0.04, 0];
   }
 
   update () {
@@ -60,6 +61,8 @@ export default class CollectedMarble extends Thing {
     this.velocity[2] -= 0.02;
 
     this.position = vec3.add(this.position, this.velocity);
+
+    this.rotation = vec3.add(this.rotation, this.avel);
 
     if (this.position[2] < -50) {
       this.isDead = true;

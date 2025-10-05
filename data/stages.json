@@ -14,16 +14,10 @@
             { "type": "basic", "position": [0, -2.5, 0] },
             { "type": "basic", "position": [0, -1.5, 0] },
             { "type": "basic", "position": [0, -5.5, 0] },
-            { "type": "fire", "position": [-4.5, -1, 0] }
+            { "type": "shock", "position": [-4.0, -1, 0] }
         ],
         "marbleSymmetry": "rotate",
         "marbleCollection": [
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
             "basic"
         ],
         "aiMarbleCollection": [

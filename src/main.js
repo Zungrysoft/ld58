@@ -2,11 +2,13 @@ import * as game from 'game'
 import * as gfx from 'webgl'
 import Table from './table.js'
 import Renderer from './renderer.js'
+import Background from './background.js'
+import TitleMenu from './menutitle.js'
 
 game.config.width = 900
 game.config.height = 540
 //game.config.isWebglEnabled = false
-document.title = 'MarblePool'
+document.title = 'Rocky Mountain Marbles'
 
 await game.loadAssets({
   images: {
@@ -23,6 +25,9 @@ await game.loadAssets({
     uv_marble_bonus: 'images/uv_marble_bonus.png',
     uv_marble_structure_ramp: 'images/uv_marble_structure_ramp.png',
     uv_marble_fire: 'images/uv_marble_fire.png',
+    uv_marble_rock: 'images/uv_marble_rock.png',
+    uv_marble_shock: 'images/uv_marble_shock.png',
+    uv_marble_metal: 'images/uv_marble_metal.png',
   },
 
   models: {
@@ -108,5 +113,7 @@ game.setScene(() => {
   const levelData = game.assets.data.stages[testLevel];
 
   game.addThing(new Renderer())
-  game.addThing(new Table(levelData))
+  game.addThing(new Background())
+  game.addThing(new TitleMenu())
+  // game.addThing(new Table(levelData))
 })

@@ -5,7 +5,6 @@ import * as mat from 'matrices'
 import * as render from './renderer.js'
 import * as vec2 from 'vector2'
 import * as vec3 from 'vector3'
-import * as themes from './themes.js'
 import Thing from 'thing'
 import { assets } from 'game'
 import Marble, { getMarbleScale, getMarbleUnshaded, MARBLE_STOP_THRESHOLD } from './marble.js'
@@ -13,17 +12,17 @@ import MarblePhysicsHandler from './physics.js'
 import Structure from './structure.js'
 import CollectParticle from './particlecollect.js'
 import CollectedMarble from './collectedmarble.js'
+import drawText from './text.js'
+import StageSelectMenu from './menustage.js'
 
 const SHOOT_TIME = 55;
 const MAX_SHOOT_POWER = 25;
 
-const COLLECTION_ANIMATION_DURATION = 14;
+const COLLECTION_ANIMATION_DURATION = 25;
 
 export default class Table extends Thing {
   time = 0
   errorTime = 0
-  viewDistance = 4
-  viewPosition = [0, 0, 0]
   inventoryP1 = []
   inventoryP2 = []
   inventoryQueueP1 = []
@@ -43,6 +42,7 @@ export default class Table extends Thing {
   playerWin = null
   winFromRunOut = false
   victoryTime = 0
+  movesLeft = 2
 
   constructor (levelData) {
     super()
@@ -107,7 +107,7 @@ export default class Table extends Thing {
     }
 
     // Set up camera based on level params
-    this.setupCamera(levelData)
+    game.getThing('background').setupCamera(levelData)
 
     // Physics setup
     this.physicsHandler = new MarblePhysicsHandler(this.meshVerts)
@@ -116,47 +116,8 @@ export default class Table extends Thing {
     }
   }
 
-  setupCamera(config) {
-    this.viewDistance = config.cameraDistance + 0.1;
-    this.viewDistanceTarget = this.viewDistance;
-    this.viewDistanceTargetShooting = config.shootCameraDistance;
-
-    this.viewPosition = [...config.cameraPosition];
-    this.viewPositionTarget = [...this.viewPosition];
-    this.viewPositionTargetShooting = [...this.viewPosition];
-
-    this.viewAngle = config.cameraStartAngle.map(x => Math.PI*(x/8))
-    this.viewAngleTarget = [...this.viewAngle]
-  }
-
-  isShootingCamera() {
-    return ['shooting', 'shot'].includes(this.phase);
-  }
-
-  updateCamera() {
-    // Set up 3D camera
-    const cam = game.getCamera3D()
-
-    // Set up clip plane
-    cam.near = 0.1
-    cam.far = 1000
-
-    const offsetPosition = [
-      Math.cos(this.viewAngle[0]) * Math.cos(this.viewAngle[1]) * this.viewDistance,
-      Math.sin(this.viewAngle[0]) * Math.cos(this.viewAngle[1]) * this.viewDistance,
-      Math.sin(this.viewAngle[1]) * this.viewDistance + 1,
-    ]
-    this.viewPosition = vec3.lerp(this.viewPosition, this.isShootingCamera() ? this.viewPositionTargetShooting : this.viewPositionTarget, 0.1)
-    this.viewDistance = u.lerp(this.viewDistance, this.isShootingCamera() ? this.viewDistanceTargetShooting : this.viewDistanceTarget, 0.1)
-    cam.position = vec3.add(offsetPosition, this.viewPosition)
-    cam.lookVector = vec3.invert(vec3.anglesToVector(this.viewAngle[0], this.viewAngle[1]))
-    cam.updateMatrices()
-  }
-
   update () {
     // super.update()
-
-    themes.spawnParticle(this.theme);
 
     this.time ++;
     this.phaseTime ++;
@@ -177,23 +138,6 @@ export default class Table extends Thing {
         this.inventoryTrayMarbleCollectionTimers[i] = 0;
       }
     }
-
-    // Camera controls
-    if (game.keysPressed.ArrowRight || game.keysPressed.KeyD) {
-      this.viewAngleTarget[0] -= Math.PI/4;
-    }
-    if (game.keysPressed.ArrowLeft || game.keysPressed.KeyA) {
-      this.viewAngleTarget[0] += Math.PI/4;
-    }
-    if (game.keysPressed.ArrowUp || game.keysPressed.KeyW) {
-      this.viewAngleTarget[1] += Math.PI/8;
-    }
-    if (game.keysPressed.ArrowDown || game.keysPressed.KeyS) {
-      this.viewAngleTarget[1] -= Math.PI/8;
-    }
-    this.viewAngleTarget[1] = u.clamp(this.viewAngleTarget[1], 0, Math.PI/2);
-    this.viewAngle = vec2.lerp(this.viewAngle, this.viewAngleTarget, 0.2);
-    this.updateCamera();
 
     // Simulate physics
     this.physicsHandler.simulateStep();
@@ -345,6 +289,7 @@ export default class Table extends Thing {
 
       this.physicsHandler.applyImpulse(this.shootingMarble, impulse);
       this.shootingMarble.isShot = true;
+      this.shootingMarble.shouldBeFrozen = true;
       this.shootingMarble = null;
       this.gotMarble = false;
       this.waitUntilEndOfShot = 30;
@@ -380,9 +325,25 @@ export default class Table extends Thing {
         return;
       }
       this.setPhase('picking');
-      this.activePlayer = this.activePlayer === 'p1' ? 'p2' : 'p1';
-      this.deQueueMarbles();
-      
+      this.movesLeft --;
+
+      if (this.movesLeft === 0 || this.getActiveInventory().length === 0) {
+        this.activePlayer = this.activePlayer === 'p1' ? 'p2' : 'p1';
+        this.movesLeft = 2;
+        this.deQueueMarbles();
+        
+        // Unfreeze all marbles
+        for (const thing of game.getThings().filter(x => x instanceof Marble)) {
+          thing.unfreeze();
+          thing.isShot = false;
+        }
+      }
+      else {
+        // Freeze all marbles that moved last turn
+        for (const thing of game.getThings().filter(x => x instanceof Marble)) {
+          thing.checkForFreeze();
+        }
+      }
     }
   }
 
@@ -394,92 +355,25 @@ export default class Table extends Thing {
     }
 
     if (this.victoryTime > 60*3 && game.mouse.leftClick) {
-      console.log("TODO: Return to menu")
+      game.addThing(new StageSelectMenu(!this.isSingleplayer))
+      this.cleanUp()
+    }
+  }
+
+  cleanUp() {
+    this.isDead = true
+    for (const thing of game.getThings().filter(x => x instanceof Marble || x instanceof Structure)) {
+      thing.isDead = true;
     }
   }
 
   draw () {
-    const { ctx } = game;
-
-    const drawText = (text, fontSize=40, color='white', position=[0, 0], align=[0, 0]) => {
-      // Hud scale and text size
-      const hs = 0.5
-
-      // Align horizontal
-      let textAlign = 'left'
-      let finalPosition = [0, 0]
-      if (align[0] < 0) {
-        finalPosition[0] = Math.round(position[0]*hs)
-        textAlign = 'left'
-      }
-      else if (align[0] > 0) {
-        finalPosition[0] = game.config.width - Math.round(position[0]*hs)
-        textAlign = 'right'
-      }
-      else {
-        finalPosition[0] = game.config.width/2 + Math.round(position[0]*hs)
-        textAlign = 'center'
-      }
-
-      // Align vertical
-      if (align[1] < 0) {
-        finalPosition[1] = Math.round(position[1]*hs)
-      }
-      else if (align[1] > 0) {
-        finalPosition[1] = game.config.height - Math.round(position[1]*hs)
-      }
-      else {
-        finalPosition[1] = game.config.height/2 + Math.round(position[1]*hs)
-      }
-
-      // Font size
-      const adjustedFontSize = Math.round(fontSize * hs)
-
-      // Shadow spacing
-      const shadowSpacing = Math.ceil((fontSize * hs) / 30);
-
-      // Render
-      ctx.save()
-      ctx.translate(...finalPosition)
-      ctx.font = `italic ${adjustedFontSize}px Verdana`
-      const str = text
-      ctx.textAlign = textAlign
-      ctx.fillStyle = 'black'
-      ctx.fillText(str, 0, 0)
-      ctx.fillStyle = color
-      ctx.fillText(str, shadowSpacing, -shadowSpacing)
-      ctx.restore()
-    }
-
-    // Skybox
-    const fogDistance = themes.getTheme(this.theme).fogDistance
-    render.drawMesh({
-      mesh: assets.meshes.skybox,
-      texture: assets.textures.square,
-      position: game.getCamera3D().position,
-      scale: [
-        fogDistance * -3,
-        fogDistance * -3,
-        fogDistance * -3,
-      ],
-    })
-
-    // Theme props
-    for (const prop of themes.getTheme(this.theme).props) {
-      render.drawMesh({
-        mesh: assets.meshes[prop.mesh],
-        texture: assets.textures[prop.texture],
-        position: [0, 0, 0],
-        color: prop.textureColor || [1, 1, 1, 1]
-      })
-    }
-
     // Table mesh
     render.drawMesh({
       mesh: assets.meshes[this.mesh],
       texture: assets.textures[this.texture] ?? assets.textures.square,
       position: [0, 0, 0],
-      color: [1, 1, 1, 1]
+      color: [0.75, 0.75, 0.75, 1]
     })
 
     // Shooting platform
@@ -493,7 +387,7 @@ export default class Table extends Thing {
     }
 
     // Shooting guide
-    if (this.phase === 'shooting' && this.selectedShootPosition && this.selectedShootTargetPosition) {
+    if (this.phase === 'shooting' && this.selectedShootPosition && this.selectedShootTargetPosition && this.readyToShoot) {
       const SPACING = 1.3;
       const DISTANCE = 14;
       const deltaVector = vec3.normalize(vec3.subtract(this.selectedShootTargetPosition, this.selectedShootPosition));
@@ -555,6 +449,7 @@ export default class Table extends Thing {
           turnText = 'Red Player\'s Turn';
         }
       }
+      turnText += ` - ${this.movesLeft} move${this.movesLeft === 1 ? '' : 's'} left`
       drawText(
         turnText,
         80, textColor, [0, 104], [0, -1]
