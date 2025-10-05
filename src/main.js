@@ -31,6 +31,7 @@ await game.loadAssets({
     skybox: 'models/skybox.obj',
     platform: 'models/platform.obj',
     aim: 'models/aim.obj',
+    ramp: 'models/ramp.obj',
 
     deco_sand: 'models/deco_sand.obj',
     deco_dumptruck: 'models/deco_dumptruck.obj',

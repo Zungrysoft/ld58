@@ -11,13 +11,13 @@ import { assets } from 'game'
 export default class Structure extends Thing {
   time = 0
 
-  constructor (mesh, texture, position, rotation) {
+  constructor (mesh, texture, position, angle) {
     super()
 
     this.mesh = mesh;
     this.texture = texture;
     this.position = [...(position ?? [0, 0, 0])];
-    this.rotation = [...(rotation ?? [0, 0, 0])];
+    this.angle = angle ?? 0;
 
     const meshData = game.assets.meshes[this.mesh];
     this.meshTriangles = []
@@ -56,7 +56,7 @@ export default class Structure extends Thing {
     let rPos = this.position;
 
     // Rotation
-    let rRot = this.rotation;
+    let rRot = [0, 0, this.angle];
 
     // Scale
     let rScale = this.scale ?? 1;
@@ -70,6 +70,7 @@ export default class Structure extends Thing {
       mesh: rMesh,
       texture: rTexture,
       position: rPos,
+      rotation: rRot,
       color: rColor,
     })
   }

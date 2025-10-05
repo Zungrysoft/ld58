@@ -12,14 +12,16 @@ import Marble from './marble.js'
 import MarblePhysicsHandler from './physics.js'
 import Structure from './structure.js'
 
-const SHOOT_TIME = 70;
+const SHOOT_TIME = 55;
+const MAX_SHOOT_POWER = 25;
 
 export default class Table extends Thing {
   time = 0
   errorTime = 0
   viewDistance = 4
   viewPosition = [0, 0, 0]
-  inventory = ['basic']
+  inventoryP1 = []
+  inventoryP2 = []
   phase = 'positioning'
   shootingPlatform = null
   shootingMarble = null
@@ -35,6 +37,8 @@ export default class Table extends Thing {
     this.texture = levelData.stageTexture;
     this.theme = levelData.theme;
     this.shootZones = levelData.shootZones;
+    this.inventoryP1 = [...levelData.marbleCollection];
+    this.inventoryP2 = [...levelData.aiMarbleCollection];
 
     for (const marble of levelData.marbles) {
       game.addThing(new Marble(marble.type, [...marble.position]));
@@ -233,9 +237,10 @@ export default class Table extends Thing {
       this.setPhase('shot');
 
       const impulseDirection = vec3.normalize(vec3.subtract(this.selectedShootTargetPosition, this.selectedShootPosition));
-      const impulse = vec3.scale(impulseDirection, u.map(this.shootPower, 0, SHOOT_TIME, 0.1, 30, true));
+      const impulse = vec3.scale(impulseDirection, u.map(this.shootPower, 0, SHOOT_TIME, 0.1, MAX_SHOOT_POWER, true));
 
       this.physicsHandler.applyImpulse(this.shootingMarble, impulse);
+      this.shootingMarble.isShot = true;
       this.shootingMarble = null;
     }
   }
@@ -246,8 +251,6 @@ export default class Table extends Thing {
       this.shootingPlatform.kill();
       return;
     }
-
-
   }
 
   draw () {
@@ -306,7 +309,7 @@ export default class Table extends Thing {
           mesh: assets.meshes.aim,
           texture: assets.textures[this.texture] ?? assets.textures.square,
           position: pos,
-          scale: 0.1,
+          scale: 0.09,
           color: powerForce >= d ? [0.9, 0, 0, 1] : [0.9, 0.8, 0, 1],
           rotation: [0, 0, angle],
         })

@@ -6,21 +6,24 @@ import * as vec3 from 'vector3'
 import * as game from 'game'
 import Thing from 'thing'
 import { assets } from 'game'
+import Structure from './structure.js'
+import PaintParticle from './particlepaint.js'
 
 
 export default class Marble extends Thing {
   time = 0
+  tableTouchTime = 999999
 
   constructor (type, position, velocity) {
     super()
 
-    console.log(type, position, velocity)
-
     this.type = type ?? 'basic';
 
+    this.density = 1.0;
     this.scale = 0.5;
     if (this.type.includes('goal')) {
-      this.scale = 0.67;
+      this.scale = 0.72;
+      this.density = 0.9;
     }
     if (this.type === 'bonus') {
       this.scale = 0.46;
@@ -37,13 +40,36 @@ export default class Marble extends Thing {
     this.velocity = [...(velocity ?? [0, 0, 0])];
 
     this.rotation = [0, 0, 0];
-    
   }
 
   update () {
     // super.update()
 
     this.time ++
+    this.tableTouchTime --;
+
+    if (this.isShot && this.tableTouchTime < 3 && vec3.magnitude(this.velocity) < 0.06) {
+      if (this.type.includes('structure_')) {
+        let angle = vec2.vectorToAngle(this.velocity);
+
+        this.kill();
+
+        const ph = game.getThing('table').physicsHandler;
+        
+        const pos = [
+          this.position[0],
+          this.position[1],
+          this.position[2] - (this.scale * 0.5),
+        ]
+        const ramp = game.addThing(new Structure(this.type.split('_')[1], null, pos, angle))
+        ph.addStructure(ramp);
+
+        // Particle effect
+        for (let i = 0; i < 20; i ++) {
+          game.addThing(new PaintParticle(this.position, [1, 1, 1, 1]))
+        }
+      }
+    }
   }
 
   kill() {

@@ -17,10 +17,10 @@ const NaiveBroadphase = CANNON.NaiveBroadphase;
 
 const TABLE_RESTITUTION = 0.5;
 const TABLE_FRICTION = 0.06;
-const MARBLE_RESTITUTION = 0.95;
-const MARBLE_FRICTION = 0.1;
-const MARBLE_LINEAR_DAMPING = 0.7;
-const MARBLE_ANGULAR_DAMPING = 0.9;
+const MARBLE_RESTITUTION = 0.97;
+const MARBLE_FRICTION = 0.05;
+const MARBLE_LINEAR_DAMPING = 0.4;
+const MARBLE_ANGULAR_DAMPING = 0.8;
 
 function quaternionToYawPitchRoll(q) {
     const x = q[2], y = q[1], z = q[0], w = q[3];
@@ -77,11 +77,45 @@ export default class MarblePhysicsHandler {
 
         // 3) Create trimesh shape & static body (table)
         const tableShape = new Trimesh(Array.from(verticesFA), Array.from(indicesIA));
+        
+
+        // Material with perfectly elastic collisions
+        this.marbleMaterial = new Material('marble');
+        this.tableMaterial = new Material('table');
+        this.structureMaterial = new Material('structure');
+
+        const marbleAndTableContact = new ContactMaterial(
+            this.marbleMaterial,
+            this.tableMaterial,
+            {
+                restitution: TABLE_RESTITUTION,
+                friction: TABLE_FRICTION,
+            }
+        );
+        const marbleAndStructureContact = new ContactMaterial(
+            this.marbleMaterial,
+            this.structureMaterial,
+            {
+                restitution: TABLE_RESTITUTION,
+                friction: TABLE_FRICTION,
+            }
+        );
+        const marbleAndMarbleContact = new ContactMaterial(
+            this.marbleMaterial,
+            this.marbleMaterial,
+            {
+                restitution: MARBLE_RESTITUTION,
+                friction: MARBLE_FRICTION,
+            }
+        );
+        this.world.addContactMaterial(marbleAndTableContact);
+        this.world.addContactMaterial(marbleAndStructureContact);
+        this.world.addContactMaterial(marbleAndMarbleContact);
 
         this.tableBody = new Body({
             mass: 0, // static
             shape: tableShape,
-            material: new Material({ friction: TABLE_FRICTION, restitution: TABLE_RESTITUTION })
+            material: this.tableMaterial,
         });
 
         this.world.addBody(this.tableBody);
@@ -92,24 +126,12 @@ export default class MarblePhysicsHandler {
 
         const sphereShape = new Sphere(radius);
 
-        // Material with perfectly elastic collisions
-        const marbleMaterial = new Material({ friction: 0.1, restitution: 0.9 });
-        const contactMaterial = new ContactMaterial(
-            marbleMaterial,
-            marbleMaterial,
-            {
-                restitution: MARBLE_RESTITUTION,
-                friction: MARBLE_FRICTION,
-            }
-        );
-        this.world.addContactMaterial(contactMaterial);
-
         const marbleBody = new Body({
-            mass: 1,
+            mass: (4/3) * Math.PI * (radius ** 3) * 15.18 * marbleObj.density,
             shape: sphereShape,
             position: new Vec3(...marbleObj.position),
             velocity: new Vec3(...marbleObj.velocity),
-            material: marbleMaterial,
+            material: this.marbleMaterial,
             linearDamping: MARBLE_LINEAR_DAMPING,
             angularDamping: MARBLE_ANGULAR_DAMPING,
         });
@@ -121,7 +143,7 @@ export default class MarblePhysicsHandler {
           const self = marbleBody;
           const other = event.body;
 
-          const contact = event.contact; // CANNON.ContactEquation
+          const contact = event.contact;
           const relativeVelocity = contact.getImpactVelocityAlongNormal();
           const massA = self.mass;
           const massB = other.mass;
@@ -135,6 +157,14 @@ export default class MarblePhysicsHandler {
                 u.map(force, 0, 1000, 0, 1, true),
                 u.map(force, 0, 2000, 0.7, 1.2, true),
               );
+            }
+            if (other.material?.name === 'table') {
+              this.marbles.forEach((mBody, marbleObj) => {
+                if (mBody === marbleBody) {
+                  marbleObj.hasTouchedTable = true;
+                  marbleObj.tableTouchTime = 0;
+                }
+              });
             }
           }
           else if (massA !== 0 && massB !== 0 && self.id < other.id) {
@@ -195,8 +225,9 @@ export default class MarblePhysicsHandler {
           mass: 0, // static
           position: new Vec3(...structureObj.position),
           shape: structureShape,
-          material: new Material({ friction: TABLE_FRICTION, restitution: TABLE_RESTITUTION })
+          material: this.structureMaterial,
       });
+      structureBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 0, 1), structureObj.angle);
 
       this.world.addBody(structureBody);
       this.structures.set(structureObj, structureBody);

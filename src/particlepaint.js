@@ -4,12 +4,11 @@ import * as vec3 from 'vector3'
 import Thing from 'thing'
 import { assets } from 'game'
 import * as render from './renderer.js'
-import { COLOR_MAP } from './element.js'
 
 export default class PaintParticle extends Thing {
   constructor (position, color) {
     super()
-    this.position = position
+    this.position = [...position]
     this.color = color
     this.velocity = this.randomVelocity()
   }
@@ -42,8 +41,8 @@ export default class PaintParticle extends Thing {
     render.drawBillboard({
       texture: assets.textures.square,
       position: this.position,
-      color: COLOR_MAP[this.color] || [1.0, 1.0, 1.0, 1.0],
-      scale: 0.06,
+      color: this.color || [1.0, 1.0, 1.0, 1.0],
+      scale: 0.03,
       unshaded: true,
     })
   }
