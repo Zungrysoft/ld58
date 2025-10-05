@@ -12,7 +12,7 @@ varying vec3 origNormal;
 
 void main() {
   // Scrolling
-  vec2 uv2 = vec2(uv.x, uv.y + scroll);
+  vec2 uv2 = vec2(uv.x, (1.0 - uv.y) + scroll);
   
   // Get diffuse color
   vec4 diffuse = texture2D(texture, uv2) * color;

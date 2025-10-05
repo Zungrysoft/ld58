@@ -8,7 +8,7 @@ import * as vec3 from 'vector3'
 import * as themes from './themes.js'
 import Thing from 'thing'
 import { assets } from 'game'
-import Marble, { getMarbleScale, MARBLE_STOP_THRESHOLD } from './marble.js'
+import Marble, { getMarbleScale, getMarbleUnshaded, MARBLE_STOP_THRESHOLD } from './marble.js'
 import MarblePhysicsHandler from './physics.js'
 import Structure from './structure.js'
 import CollectParticle from './particlecollect.js'
@@ -39,11 +39,16 @@ export default class Table extends Thing {
   depth = 300
   pickedMarbleIndex = 0
   waitUntilEndOfShot = 0
+  activePlayer = 'p1'
+  playerWin = null
+  winFromRunOut = false
+  victoryTime = 0
 
   constructor (levelData) {
     super()
     game.setThingName(this, 'table')
 
+    this.isSingleplayer = levelData.isSingleplayer;
     this.title = levelData.title;
     this.mesh = levelData.stageMesh;
     this.texture = levelData.stageTexture;
@@ -51,7 +56,7 @@ export default class Table extends Thing {
     this.shootZones = levelData.shootZones;
     this.marbleCollectHeight = levelData.marbleCollectHeight;
     this.inventoryP1 = [...levelData.marbleCollection];
-    this.inventoryP2 = [...levelData.aiMarbleCollection];
+    this.inventoryP2 = this.isSingleplayer ? [...levelData.aiMarbleCollection] : [...levelData.marbleCollection];
 
     for (const marble of levelData.marbles) {
       game.addThing(new Marble(marble.type, [...marble.position]));
@@ -151,6 +156,8 @@ export default class Table extends Thing {
   update () {
     // super.update()
 
+    themes.spawnParticle(this.theme);
+
     this.time ++;
     this.phaseTime ++;
     this.errorTime --;
@@ -203,6 +210,9 @@ export default class Table extends Thing {
     else if (this.phase === 'shot') {
       this.updateShot();
     }
+    else if (this.phase === 'victory') {
+      this.updateVictory();
+    }
   }
 
   setPhase(phase) {
@@ -211,23 +221,36 @@ export default class Table extends Thing {
   }
 
   getActiveInventory() {
-    if (this.activePlayer === 'p2' || this.activePlayer === 'ai') {
-      return this.inventoryP2;
+    if (this.activePlayer === 'p1') {
+      return this.inventoryP1;
     }
-    return this.inventoryP1;
+    return this.inventoryP2;
   }
 
   getActiveInventoryQueue() {
-    if (this.activePlayer === 'p2' || this.activePlayer === 'ai') {
-      return this.inventoryQueueP2;
+    if (this.activePlayer === 'p1') {
+      return this.inventoryQueueP1;
     }
-    return this.inventoryQueueP1;
+    return this.inventoryQueueP2;
   }
 
   addMarble(type) {
     this.gotMarble = true;
-    game.addThing(new CollectedMarble(type));
+    
     this.getActiveInventoryQueue().push(type);
+
+    if (type === 'goal_p1') {
+      this.playerWin = 'p2';
+      this.setPhase('victory');
+    }
+    else if (type === 'goal_p2') {
+      this.playerWin = 'p1';
+      this.setPhase('victory');
+    }
+    
+    if (this.phase !== 'victory') {
+      game.addThing(new CollectedMarble(type));
+    }
   }
 
   deQueueMarbles() {
@@ -316,14 +339,16 @@ export default class Table extends Thing {
     if (!game.mouse.leftButton && this.readyToShoot && this.shootPower > 0) {
       this.setPhase('shot');
 
+      const impulseForce = u.map(this.shootPower, 0, SHOOT_TIME, 0.1, MAX_SHOOT_POWER, true) * this.shootingMarble.getMass();
       const impulseDirection = vec3.normalize(vec3.subtract(this.selectedShootTargetPosition, this.selectedShootPosition));
-      const impulse = vec3.scale(impulseDirection, u.map(this.shootPower, 0, SHOOT_TIME, 0.1, MAX_SHOOT_POWER, true));
+      const impulse = vec3.scale(impulseDirection, impulseForce);
 
       this.physicsHandler.applyImpulse(this.shootingMarble, impulse);
       this.shootingMarble.isShot = true;
       this.shootingMarble = null;
       this.gotMarble = false;
       this.waitUntilEndOfShot = 30;
+      this.shootingPlatform.kill();
       this.getActiveInventory().splice(this.pickedMarbleIndex, 1);
     }
   }
@@ -348,14 +373,84 @@ export default class Table extends Thing {
     }
     if (this.waitUntilEndOfShot <= 0) {
       this.physicsHandler.stopAllMarbles();
+      if (this.getActiveInventory().length === 0 && this.getActiveInventoryQueue().length === 0) {
+        this.setPhase('victory');
+        this.playerWin = this.activePlayer === 'p1' ? 'p2' : 'p1';
+        this.winFromRunOut = true;
+        return;
+      }
       this.setPhase('picking');
+      this.activePlayer = this.activePlayer === 'p1' ? 'p2' : 'p1';
       this.deQueueMarbles();
-      this.shootingPlatform.kill();
-      return;
+      
+    }
+  }
+
+  updateVictory() {
+    this.victoryTime ++;
+
+    if (this.victoryTime < 60*3 && this.victoryTime % 8 === 0) {
+      game.addThing(new CollectedMarble('goal_' + this.playerWin, this.isSingleplayer && this.playerWin === 'p2' ? 'defeat' : 'victory'));
+    }
+
+    if (this.victoryTime > 60*3 && game.mouse.leftClick) {
+      console.log("TODO: Return to menu")
     }
   }
 
   draw () {
+    const { ctx } = game;
+
+    const drawText = (text, fontSize=40, color='white', position=[0, 0], align=[0, 0]) => {
+      // Hud scale and text size
+      const hs = 0.5
+
+      // Align horizontal
+      let textAlign = 'left'
+      let finalPosition = [0, 0]
+      if (align[0] < 0) {
+        finalPosition[0] = Math.round(position[0]*hs)
+        textAlign = 'left'
+      }
+      else if (align[0] > 0) {
+        finalPosition[0] = game.config.width - Math.round(position[0]*hs)
+        textAlign = 'right'
+      }
+      else {
+        finalPosition[0] = game.config.width/2 + Math.round(position[0]*hs)
+        textAlign = 'center'
+      }
+
+      // Align vertical
+      if (align[1] < 0) {
+        finalPosition[1] = Math.round(position[1]*hs)
+      }
+      else if (align[1] > 0) {
+        finalPosition[1] = game.config.height - Math.round(position[1]*hs)
+      }
+      else {
+        finalPosition[1] = game.config.height/2 + Math.round(position[1]*hs)
+      }
+
+      // Font size
+      const adjustedFontSize = Math.round(fontSize * hs)
+
+      // Shadow spacing
+      const shadowSpacing = Math.ceil((fontSize * hs) / 30);
+
+      // Render
+      ctx.save()
+      ctx.translate(...finalPosition)
+      ctx.font = `italic ${adjustedFontSize}px Verdana`
+      const str = text
+      ctx.textAlign = textAlign
+      ctx.fillStyle = 'black'
+      ctx.fillText(str, 0, 0)
+      ctx.fillStyle = color
+      ctx.fillText(str, shadowSpacing, -shadowSpacing)
+      ctx.restore()
+    }
+
     // Skybox
     const fogDistance = themes.getTheme(this.theme).fogDistance
     render.drawMesh({
@@ -397,6 +492,7 @@ export default class Table extends Thing {
       })
     }
 
+    // Shooting guide
     if (this.phase === 'shooting' && this.selectedShootPosition && this.selectedShootTargetPosition) {
       const SPACING = 1.3;
       const DISTANCE = 14;
@@ -418,6 +514,7 @@ export default class Table extends Thing {
       }
     }
 
+    // Inventory
     let xPos = 9.2;
     let i = 0;
     for (const marbleType of this.getActiveInventory()) {
@@ -432,9 +529,94 @@ export default class Table extends Thing {
         position: [xPos, -10.4, -3.7 + (this.inventoryTrayPosition * 3) + ((this.inventoryTrayMarbleHeights[i] ?? 0) * 0.7)],
         scale: 2 * getMarbleScale(marbleType) * collectScale,
         rotation: [0, 0, 0],
+        unshaded: getMarbleUnshaded(marbleType),
       })
       xPos -= 1.6
       i ++;
+    }
+
+    // Who's turn?
+    let textColor = this.activePlayer === 'p1' ? 'blue' : '#c24823';
+    if (this.phase !== 'shot' && this.phase !== 'victory') {
+      let turnText = ''
+      if (this.isSingleplayer) {
+        if (this.activePlayer !== 'p1') {
+          turnText = 'Opponent\'s Turn';
+        }
+        else {
+          turnText = 'Your Turn'
+        }
+      }
+      else {
+        if (this.activePlayer === 'p1') {
+          turnText = 'Blue Player\'s Turn';
+        }
+        else {
+          turnText = 'Red Player\'s Turn';
+        }
+      }
+      drawText(
+        turnText,
+        80, textColor, [0, 104], [0, -1]
+      )
+    }
+    
+    // Phase hint
+    let phaseText = '';
+    if (this.phase === 'picking') {
+      phaseText = 'Select your marble';
+    }
+    if (this.phase === 'positioning') {
+      phaseText = 'Choose an edge point';
+    }
+    if (this.phase === 'shooting') {
+      phaseText = 'Aim your marble';
+    }
+    drawText(
+      phaseText,
+      40, textColor, [0, 160], [0, -1]
+    )
+
+    // Victory text
+    if (this.phase === 'victory') {
+      let textColor = this.playerWin === 'p1' ? 'blue' : '#c24823';
+      let victoryText = '';
+      let hintText = '';
+      if (this.isSingleplayer) {
+        victoryText = this.playerWin === 'p1' ? 'Level Complete!' : 'Defeat'
+        hintText = this.playerWin === 'p1' ? 'You captured your opponent\'s goal ball!' : 'Your opponent captured your goal ball!'
+        if (this.playerWin !== this.activePlayer) {
+          hintText = this.playerWin === 'p1' ? 'Your opponent accidentally captured their own goal ball!' : 'You captured your own goal ball!'
+        }
+        if (this.winFromRunOut) {
+          hintText = this.playerWin === 'p1' ? 'Your opponent ran out of marbles!' : 'You ran out of marbles!'
+        }
+      }
+      else {
+        victoryText = this.playerWin === 'p1' ? 'Blue Wins!' : 'Red Wins!'
+        hintText = this.playerWin === 'p1' ? 'Blue captured Red\'s goal ball!' : 'Red captured Blue\'s goal ball!'
+        if (this.playerWin !== this.activePlayer) {
+          hintText = this.playerWin === 'p1' ? 'Red accidentally captured their own goal ball!' : 'Blue accidentally captured their own goal ball!';
+        }
+        if (this.winFromRunOut) {
+          hintText = this.playerWin === 'p1' ? 'Red ran out of marbles!' : 'Blue ran out of marbles!'
+        }
+      }
+
+      drawText(
+        victoryText,
+        120, textColor, [0, -30], [0, 0]
+      )
+      drawText(
+        hintText,
+        50, textColor, [0, 30], [0, 0]
+      )
+      if (this.victoryTime > 60*5) {
+        drawText(
+          'Click to exit',
+          60, textColor, [0, 220], [0, 0]
+        )
+      }
     }
   }
 }

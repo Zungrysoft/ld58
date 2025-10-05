@@ -15,7 +15,7 @@ const Material = CANNON.Material;
 const ContactMaterial = CANNON.ContactMaterial;
 const NaiveBroadphase = CANNON.NaiveBroadphase;
 
-const TABLE_RESTITUTION = 0.5;
+const TABLE_RESTITUTION = 0.7;
 const TABLE_FRICTION = 0.06;
 const MARBLE_RESTITUTION = 0.97;
 const MARBLE_FRICTION = 0.05;
@@ -125,9 +125,8 @@ export default class MarblePhysicsHandler {
     const radius = marbleObj.scale / 2;
 
     const sphereShape = new Sphere(radius);
-
     const marbleBody = new Body({
-      mass: (4 / 3) * Math.PI * (radius ** 3) * 15.18 * marbleObj.density,
+      mass: marbleObj.getMass(),
       shape: sphereShape,
       position: new Vec3(...marbleObj.position),
       velocity: new Vec3(...marbleObj.velocity),
@@ -142,6 +141,17 @@ export default class MarblePhysicsHandler {
     marbleBody.addEventListener("collide", (event) => {
       const self = marbleBody;
       const other = event.body;
+
+      let selfObj = null;
+      let otherObj = null;
+      this.marbles.forEach((mBody, marbleObj) => {
+        if (mBody === self) {
+          selfObj = marbleObj;
+        }
+        if (mBody === other) {
+          otherObj = marbleObj;
+        }
+      });
 
       const contact = event.contact;
       const relativeVelocity = contact.getImpactVelocityAlongNormal();
@@ -159,23 +169,25 @@ export default class MarblePhysicsHandler {
           );
         }
         if (other.material?.name === 'table') {
-          this.marbles.forEach((mBody, marbleObj) => {
-            if (mBody === marbleBody) {
-              marbleObj.hasTouchedTable = true;
-              marbleObj.tableTouchTime = 0;
-            }
-          });
+          selfObj.hasTouchedTable = true;
+          selfObj.tableTouchTime = 0;
         }
       }
-      else if (massA !== 0 && massB !== 0 && self.id < other.id) {
-        const dt = 1 / 60;
-        const force = Math.abs(relativeVelocity) * (massA * massB) / (massA + massB) / dt;
-        if (force > 10) {
-          soundmanager.playSound(
-            'hitMarble',
-            u.map(force, 0, 1000, 0, 1, true),
-            u.map(force, 0, 2000, 0.5, 1.1, true),
-          );
+      else if (massA !== 0 && massB !== 0) {
+        if (self.id < other.id) {
+          const dt = 1 / 60;
+          const force = Math.abs(relativeVelocity) * (massA * massB) / (massA + massB) / dt;
+          if (force > 10) {
+            soundmanager.playSound(
+              'hitMarble',
+              u.map(force, 0, 1000, 0, 1, true),
+              u.map(force, 0, 2000, 0.5, 1.1, true),
+            );
+          }
+        }
+
+        if (selfObj.isOnFire()) {
+          otherObj.burnUp();
         }
       }
     });

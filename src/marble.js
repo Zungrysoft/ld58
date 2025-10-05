@@ -9,8 +9,12 @@ import { assets } from 'game'
 import Structure from './structure.js'
 import PaintParticle from './particlepaint.js'
 import CollectParticle from './particlecollect.js'
+import SmokeParticle from './particlesmoke.js'
+import SparkParticle from './particleSpark.js'
 
 export const MARBLE_STOP_THRESHOLD = 0.04;
+
+export const FIRE_MARBLE_SPEED_THRESHOLD = 1.8;
 
 export function getMarbleScale(type) {
   if (type.includes('goal')) {
@@ -31,9 +35,16 @@ export function getMarbleScale(type) {
 
 export function getMarbleDensity(type) {
   if (type.includes('goal')) {
-    return 0.9;
+    return 1.02;
   }
   return 1.0;
+}
+
+export function getMarbleUnshaded(type) {
+  if (['fire'].includes(type)) {
+    return true;
+  }
+  return false;
 }
 
 export default class Marble extends Thing {
@@ -53,6 +64,10 @@ export default class Marble extends Thing {
     this.velocity = [...(velocity ?? [0, 0, 0])];
 
     this.rotation = [0, 0, 0];
+  }
+
+  getMass() {
+    return (4 / 3) * Math.PI * ((this.scale / 2) ** 3) * 15.18 * this.density;
   }
 
   update () {
@@ -88,6 +103,41 @@ export default class Marble extends Thing {
 
         game.getThing('table').setWaitUntilEndOfShot(60);
       }
+    }
+
+    if (this.isOnFire()) {
+      if (Math.random() < 0.2) {
+        game.addThing(new SmokeParticle(this.position))
+      }
+      if (Math.random() < 0.6) {
+        game.addThing(new SparkParticle(this.position))
+      }
+    }
+
+    if (this.isBurnt) {
+      this.kill();
+    }
+  }
+
+  isOnFire() {
+    return this.type === 'fire' && vec3.magnitude(this.velocity) > FIRE_MARBLE_SPEED_THRESHOLD;
+  }
+
+  burnUp() {
+    if (!(this.type.includes('goal'))) {
+      for (let i = 0; i < 20; i ++) {
+        game.addThing(new SparkParticle(this.position))
+      }
+      for (let i = 0; i < 5; i ++) {
+        const radius = this.scale * 0.9;
+        const smokePos = [
+          Math.random() * radius * 2 - radius,
+          Math.random() * radius * 2 - radius,
+          Math.random() * radius * 2 - radius,
+        ]
+        game.addThing(new SmokeParticle(vec3.add(this.position, smokePos), 2))
+      }
+      this.isBurnt = true;
     }
   }
 
@@ -145,6 +195,7 @@ export default class Marble extends Thing {
       scale: rScale,
       color: rColor,
       glow: rGlow,
+      unshaded: getMarbleUnshaded(this.type),
     })
   }
 }

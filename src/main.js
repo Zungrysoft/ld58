@@ -12,7 +12,9 @@ await game.loadAssets({
   images: {
     background: 'images/bg1.png',
     square: 'images/square.png',
+    smoke: 'images/smoke.png',
 
+    uv_deco_mountains: 'images/uv_deco_mountains.png',
     uv_deco_sand: 'images/uv_deco_sand.png',
     uv_deco_dumptruck: 'images/uv_deco_dumptruck.png',
 
@@ -20,6 +22,7 @@ await game.loadAssets({
     uv_marble_goal_p2: 'images/uv_marble_goal_p2.png',
     uv_marble_bonus: 'images/uv_marble_bonus.png',
     uv_marble_structure_ramp: 'images/uv_marble_structure_ramp.png',
+    uv_marble_fire: 'images/uv_marble_fire.png',
   },
 
   models: {
@@ -33,6 +36,7 @@ await game.loadAssets({
     aim: 'models/aim.obj',
     ramp: 'models/ramp.obj',
 
+    deco_mountains: 'models/deco_mountains.obj',
     deco_sand: 'models/deco_sand.obj',
     deco_dumptruck: 'models/deco_dumptruck.obj',
     deco_dumptruck_sand: 'models/deco_dumptruck_sand.obj',

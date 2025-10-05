@@ -11,5 +11,15 @@
     "fogDistance": 33,
     "fogColor": [0.8, 0.8, 0.71],
     "music": ""
+  },
+  "mountains": {
+    "props": [
+      {"mesh": "deco_mountains", "texture": "uv_deco_mountains"}
+    ],
+    "particle": "snow",
+    "particleRate": 0.6,
+    "fogDistance": 600,
+    "fogColor": [0.95, 0.95, 0.96],
+    "music": ""
   }
 }

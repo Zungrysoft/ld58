@@ -5,7 +5,7 @@ import Thing from 'thing'
 import { assets } from 'game'
 import * as render from './renderer.js'
 
-export default class SandParticle extends Thing {
+export default class SnowParticle extends Thing {
   speed = 0.06
   windRate = 0.03
   windScale = 0.03
@@ -14,11 +14,11 @@ export default class SandParticle extends Thing {
 
   constructor () {
     super()
-    const radius = 10
+    const radius = 30
     this.position = [
       (Math.random() * 2 * radius) - radius,
       (Math.random() * 2 * radius) - radius,
-      (Math.random() * 2 * radius) - radius,
+      30,
     ]
   }
 
@@ -27,12 +27,12 @@ export default class SandParticle extends Thing {
     const boardTime = game.getThing('table').time || 0
 
     // Move
-    this.position = vec3.add(this.position, [-0.06, -0.006, 0.025])
+    this.position = vec3.add(this.position, [-0.06, -0.006, -0.085])
     this.position[0] += Math.sin((boardTime/60) * this.windRate * Math.PI*2) * this.windScale
     this.position[0] += Math.sin((boardTime/60) * this.windRate * Math.PI*2 * 1.2) * this.windScale
 
     // Kill if too far away or too old
-    if (vec3.magnitude(this.position) > 20 || this.time > 600) {
+    if (vec3.magnitude(this.position) > 40 || this.time > 600) {
       this.isDead = true
     }
   }
@@ -41,7 +41,7 @@ export default class SandParticle extends Thing {
     render.drawBillboard({
       texture: assets.textures.square,
       position: this.position,
-      color: [0.7, 0.7, 0.46, 1.0],
+      color: [1.0, 1.0, 1.0, 1.0],
       scale: 0.04,
       unshaded: true,
     })
