@@ -37,6 +37,40 @@ export function drawMesh ({
   gfx.drawMesh(mesh)
 }
 
+export function drawUIMesh({
+  mesh,
+  texture,
+  position,
+  rotation=[0.0, 0.0, 0.0],
+  scale=1.0,
+  color=[1, 1, 1, 1],
+  unshaded=false,
+}={}) {
+  const { gl } = game
+
+  gfx.setFramebuffer(unshaded ? game.globals.framebufferUnshaded.framebuffer : game.globals.framebuffer.framebuffer)
+  gfx.setShader(unshaded ? assets.shaders.unshaded : assets.shaders.shaded)
+
+  gfx.set('viewMatrix', [
+    1, 0, 0, 0,
+    0, 0, 1, 0,
+    0, 2, 0, 0,
+    0, 0, 0, 1
+  ])
+  // gl.clear(gl.DEPTH_BUFFER_BIT);
+  gfx.set('projectionMatrix', mat.getPerspective({ fovy: Math.PI / 4 }))
+  gfx.set('color', color)
+  gfx.set('scroll', 0)
+  gfx.setTexture(texture)
+  gfx.set('modelMatrix', mat.getTransformation({
+    position: position,
+    rotation: rotation,
+    scale: scale,
+  }))
+  gfx.set('rotationMatrix', mat.getRotation(rotation))
+  gfx.drawMesh(mesh)
+}
+
 export function drawBillboard ({
   texture,
   position,

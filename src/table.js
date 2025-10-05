@@ -8,12 +8,16 @@ import * as vec3 from 'vector3'
 import * as themes from './themes.js'
 import Thing from 'thing'
 import { assets } from 'game'
-import Marble from './marble.js'
+import Marble, { getMarbleScale, MARBLE_STOP_THRESHOLD } from './marble.js'
 import MarblePhysicsHandler from './physics.js'
 import Structure from './structure.js'
+import CollectParticle from './particlecollect.js'
+import CollectedMarble from './collectedmarble.js'
 
 const SHOOT_TIME = 55;
 const MAX_SHOOT_POWER = 25;
+
+const COLLECTION_ANIMATION_DURATION = 14;
 
 export default class Table extends Thing {
   time = 0
@@ -22,11 +26,19 @@ export default class Table extends Thing {
   viewPosition = [0, 0, 0]
   inventoryP1 = []
   inventoryP2 = []
-  phase = 'positioning'
+  inventoryQueueP1 = []
+  inventoryQueueP2 = []
+  phase = 'picking'
   shootingPlatform = null
   shootingMarble = null
   shootPower = 0
   phaseTime = 0
+  inventoryTrayPosition = 0
+  inventoryTrayMarbleHeights = []
+  inventoryTrayMarbleCollectionTimers = []
+  depth = 300
+  pickedMarbleIndex = 0
+  waitUntilEndOfShot = 0
 
   constructor (levelData) {
     super()
@@ -37,6 +49,7 @@ export default class Table extends Thing {
     this.texture = levelData.stageTexture;
     this.theme = levelData.theme;
     this.shootZones = levelData.shootZones;
+    this.marbleCollectHeight = levelData.marbleCollectHeight;
     this.inventoryP1 = [...levelData.marbleCollection];
     this.inventoryP2 = [...levelData.aiMarbleCollection];
 
@@ -96,7 +109,6 @@ export default class Table extends Thing {
     for (const thing of game.getThings().filter(x => x instanceof Marble)) {
       this.physicsHandler.addMarble(thing)
     }
-    
   }
 
   setupCamera(config) {
@@ -143,6 +155,22 @@ export default class Table extends Thing {
     this.phaseTime ++;
     this.errorTime --;
 
+    const selectedMarble = this.getSelectedMarble();
+    const showInventoryTray = this.phase === 'picking';
+    this.inventoryTrayPosition = u.lerp(this.inventoryTrayPosition, showInventoryTray ? 0 : -1, 0.2)
+    for (let i = 0; i < Math.max(this.inventoryP1.length, this.inventoryP2.length); i ++) {
+      this.inventoryTrayMarbleHeights[i] = u.lerp(this.inventoryTrayMarbleHeights[i] ?? 0, i === selectedMarble && this.phase === 'picking' ? 1 : 0, 0.2)
+
+      if (this.phase === 'picking') {
+        if (Math.abs(this.inventoryTrayPosition - 0) < 0.03) {
+          this.inventoryTrayMarbleCollectionTimers[i] = (this.inventoryTrayMarbleCollectionTimers[i] ?? 0) - 1;
+        }
+      }
+      else {
+        this.inventoryTrayMarbleCollectionTimers[i] = 0;
+      }
+    }
+
     // Camera controls
     if (game.keysPressed.ArrowRight || game.keysPressed.KeyD) {
       this.viewAngleTarget[0] -= Math.PI/4;
@@ -163,7 +191,10 @@ export default class Table extends Thing {
     // Simulate physics
     this.physicsHandler.simulateStep();
 
-    if (this.phase === 'positioning') {
+    if (this.phase === 'picking') {
+      this.updatePicking();
+    }
+    else if (this.phase === 'positioning') {
       this.updatePositioning();
     }
     else if (this.phase === 'shooting') {
@@ -179,7 +210,56 @@ export default class Table extends Thing {
     this.phase = phase;
   }
 
+  getActiveInventory() {
+    if (this.activePlayer === 'p2' || this.activePlayer === 'ai') {
+      return this.inventoryP2;
+    }
+    return this.inventoryP1;
+  }
+
+  getActiveInventoryQueue() {
+    if (this.activePlayer === 'p2' || this.activePlayer === 'ai') {
+      return this.inventoryQueueP2;
+    }
+    return this.inventoryQueueP1;
+  }
+
+  addMarble(type) {
+    this.gotMarble = true;
+    game.addThing(new CollectedMarble(type));
+    this.getActiveInventoryQueue().push(type);
+  }
+
+  deQueueMarbles() {
+    while(this.getActiveInventoryQueue().length > 0) {
+      this.getActiveInventory().push(this.getActiveInventoryQueue()[0]);
+      this.getActiveInventoryQueue().splice(0, 1);
+      this.inventoryTrayMarbleCollectionTimers[this.getActiveInventory().length - 1] = COLLECTION_ANIMATION_DURATION;
+    }
+  }
+
+  getSelectedMarble() {
+    const SPACING = 70;
+    if (game.mouse.position[1] < (game.config.height - 40) && game.mouse.position[1] > (game.config.height - 120)) {
+      return Math.floor((game.mouse.position[0] - 15) / SPACING);
+    }
+    return -1;
+  }
+
+  updatePicking() {
+    const selectedMarble = this.getSelectedMarble();
+    if (game.mouse.leftClick && selectedMarble < this.getActiveInventory().length && selectedMarble >= 0) {
+      this.setPhase('positioning');
+      this.pickedMarbleIndex = selectedMarble;
+    }
+  }
+
   updatePositioning() {
+    if (game.mouse.rightClick) {
+      this.setPhase('picking');
+      return;
+    }
+
     const cameraPos = game.getCamera3D().position;
     const cameraRay = game.getCamera3D().getMouseRay();
 
@@ -201,7 +281,7 @@ export default class Table extends Thing {
 
       // Add platform and marble
       this.shootingPlatform = game.addThing(new Structure('platform', null, this.selectedShootPosition));
-      this.shootingMarble = game.addThing(new Marble('structure_ramp', [...this.selectedShootPosition]));
+      this.shootingMarble = game.addThing(new Marble(this.getActiveInventory()[this.pickedMarbleIndex], [...this.selectedShootPosition]));
       this.physicsHandler.addStructure(this.shootingPlatform);
       this.physicsHandler.addMarble(this.shootingMarble);
     }
@@ -242,12 +322,34 @@ export default class Table extends Thing {
       this.physicsHandler.applyImpulse(this.shootingMarble, impulse);
       this.shootingMarble.isShot = true;
       this.shootingMarble = null;
+      this.gotMarble = false;
+      this.waitUntilEndOfShot = 30;
+      this.getActiveInventory().splice(this.pickedMarbleIndex, 1);
     }
   }
 
+  allMarblesStopped() {
+    for (const marble of game.getThings().filter(x => x instanceof Marble)) {
+      if (vec3.magnitude(marble.velocity) > MARBLE_STOP_THRESHOLD) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  setWaitUntilEndOfShot(wait) {
+    this.waitUntilEndOfShot = Math.max(this.waitUntilEndOfShot, wait);
+  }
+
   updateShot() {
-    if (game.mouse.rightClick || this.phaseTime > 120) {
-      this.setPhase('positioning');
+    if (this.allMarblesStopped()) {
+      this.waitUntilEndOfShot --;
+      this.physicsHandler.stopAllMarbles(); // Make sure they're really stopped
+    }
+    if (this.waitUntilEndOfShot <= 0) {
+      this.physicsHandler.stopAllMarbles();
+      this.setPhase('picking');
+      this.deQueueMarbles();
       this.shootingPlatform.kill();
       return;
     }
@@ -314,6 +416,25 @@ export default class Table extends Thing {
           rotation: [0, 0, angle],
         })
       }
+    }
+
+    let xPos = 9.2;
+    let i = 0;
+    for (const marbleType of this.getActiveInventory()) {
+      let collectScale = 1.0;
+      if (this.inventoryTrayMarbleCollectionTimers[i] > 0) {
+        collectScale = u.map(this.inventoryTrayMarbleCollectionTimers[i] ?? 0, COLLECTION_ANIMATION_DURATION, 0, 0, 1.2);
+      }
+      
+      render.drawUIMesh({
+        mesh: assets.meshes.sphere,
+        texture: assets.textures['uv_marble_' + marbleType] ?? assets.textures.square,
+        position: [xPos, -10.4, -3.7 + (this.inventoryTrayPosition * 3) + ((this.inventoryTrayMarbleHeights[i] ?? 0) * 0.7)],
+        scale: 2 * getMarbleScale(marbleType) * collectScale,
+        rotation: [0, 0, 0],
+      })
+      xPos -= 1.6
+      i ++;
     }
   }
 }

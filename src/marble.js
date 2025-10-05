@@ -8,7 +8,33 @@ import Thing from 'thing'
 import { assets } from 'game'
 import Structure from './structure.js'
 import PaintParticle from './particlepaint.js'
+import CollectParticle from './particlecollect.js'
 
+export const MARBLE_STOP_THRESHOLD = 0.04;
+
+export function getMarbleScale(type) {
+  if (type.includes('goal')) {
+    return 0.72;
+  }
+  if (type === 'bonus') {
+    return 0.46;
+  }
+  if (type === 'heavy') {
+    return 0.9;
+  }
+  else if (type === 'mega') {
+    return 1.3;
+  }
+
+  return 0.5;
+}
+
+export function getMarbleDensity(type) {
+  if (type.includes('goal')) {
+    return 0.9;
+  }
+  return 1.0;
+}
 
 export default class Marble extends Thing {
   time = 0
@@ -19,21 +45,8 @@ export default class Marble extends Thing {
 
     this.type = type ?? 'basic';
 
-    this.density = 1.0;
-    this.scale = 0.5;
-    if (this.type.includes('goal')) {
-      this.scale = 0.72;
-      this.density = 0.9;
-    }
-    if (this.type === 'bonus') {
-      this.scale = 0.46;
-    }
-    if (this.type === 'heavy') {
-      this.scale = 0.9;
-    }
-    else if (this.type === 'mega') {
-      this.scale = 1.3;
-    }
+    this.density = getMarbleDensity(type);
+    this.scale = getMarbleScale(type);
 
     this.position = [...(position ?? [0, 0, 0])];
     this.position[2] += this.scale * 0.5 + 0.1;
@@ -48,7 +61,11 @@ export default class Marble extends Thing {
     this.time ++
     this.tableTouchTime --;
 
-    if (this.isShot && this.tableTouchTime < 3 && vec3.magnitude(this.velocity) < 0.06) {
+    if (this.position[2] < (game.getThing('table')?.collectHeight ?? -5)) {
+      this.collect();
+    }
+
+    if (this.isShot && this.tableTouchTime < 3 && vec3.magnitude(this.velocity) < MARBLE_STOP_THRESHOLD * 2) {
       if (this.type.includes('structure_')) {
         let angle = vec2.vectorToAngle(this.velocity);
 
@@ -68,8 +85,20 @@ export default class Marble extends Thing {
         for (let i = 0; i < 20; i ++) {
           game.addThing(new PaintParticle(this.position, [1, 1, 1, 1]))
         }
+
+        game.getThing('table').setWaitUntilEndOfShot(60);
       }
     }
+  }
+
+  collect() {
+    for (let i = 0; i < 15; i ++) {
+      game.addThing(new CollectParticle(this.position, this.type))
+    }
+
+    game.getThing('table').addMarble(this.type);
+
+    this.kill();
   }
 
   kill() {

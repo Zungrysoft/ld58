@@ -22,6 +22,7 @@
             "basic",
             "basic",
             "basic",
+            "structure_ramp",
             "basic"
         ],
         "aiMarbleCollection": [
@@ -37,6 +38,7 @@
         "shootCameraDistance": 2,
         "cameraPosition": [0, 0, 0],
         "cameraStartAngle": [4, 3],
+        "marbleCollectHeight": -3,
         "shootZones": [
             {
                 "height": 0.2,

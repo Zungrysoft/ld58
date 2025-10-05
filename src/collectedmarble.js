@@ -1,0 +1,52 @@
+import * as render from './renderer.js'
+import * as vec3 from 'vector3'
+import Thing from 'thing'
+import { assets } from 'game'
+import { getMarbleScale } from './marble.js'
+
+
+export default class CollectedMarble extends Thing {
+  time = 0
+
+  constructor (type) {
+    super()
+
+    this.type = type ?? 'basic';
+
+    this.position = [
+      -6 + Math.random()*3,
+      -10.4,
+      -6.7,
+    ]
+    this.velocity = [
+      -0.04 - Math.random()*0.04,
+      0,
+      0.6 + Math.random() * 0.08,
+    ]
+
+    this.rotation = [Math.random() * Math.PI, Math.random() * Math.PI, 0];
+  }
+
+  update () {
+    this.time ++
+
+    this.velocity[2] -= 0.02;
+
+    this.position = vec3.add(this.position, this.velocity);
+
+    if (this.position[2] < -50) {
+      this.isDead = true;
+    }
+  }
+
+  draw () {
+    render.drawUIMesh({
+      mesh: assets.meshes.sphere,
+      texture: assets.textures['uv_marble_' + this.type] ?? assets.textures.square,
+      position: this.position,
+      scale: 2 * getMarbleScale(this.type),
+      rotation: this.rotation,
+    })
+  }
+}
+
