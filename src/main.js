@@ -67,6 +67,8 @@ await game.loadAssets({
     victory: 'sounds/victory.wav',
     defeat: 'sounds/defeat.wav',
     aim: 'sounds/aim.wav',
+    switch: 'sounds/switch.wav',
+    switch_players: 'sounds/switch_players.wav',
   },
 
   data: {

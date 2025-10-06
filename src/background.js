@@ -24,6 +24,8 @@ export default class Background extends Thing {
   viewAngle = MENU_VIEW_ANGLE;
   viewAngleTarget = MENU_VIEW_ANGLE;
 
+  zoomedCamera = false;
+
   constructor() {
     super()
 
@@ -46,7 +48,7 @@ export default class Background extends Thing {
     // this.viewAngleTarget = [...this.viewAngle]
 
     this.viewDistanceTarget = config.cameraDistance + 0.1;
-    this.viewDistanceTargetShooting = config.cameraDistance + 0.1;
+    this.viewDistanceTargetShooting = config.shootCameraDistance;
 
     this.viewPositionTarget = [...config.cameraPosition];
     this.viewPositionTargetShooting = [...config.cameraPosition];
@@ -78,7 +80,7 @@ export default class Background extends Thing {
   }
 
   isShootingCamera() {
-    return ['shooting', 'shot'].includes(game.getThing('table')?.phase);
+    return this.zoomedCamera && ['shooting', 'shot'].includes(game.getThing('table')?.phase);
   }
 
   updateCamera() {
@@ -89,10 +91,11 @@ export default class Background extends Thing {
     cam.near = 0.1;
     cam.far = 1000;
 
+    const viewDistanceTarget = this.zoomedCamera ? this.viewDistanceTarget - 4 : this.viewDistanceTarget;
     this.viewAngleTarget[1] = u.clamp(this.viewAngleTarget[1], 0, Math.PI/2);
     this.viewAngle = vec2.lerp(this.viewAngle, this.viewAngleTarget, 0.2);
     this.viewPosition = vec3.lerp(this.viewPosition, this.isShootingCamera() ? this.viewPositionTargetShooting : this.viewPositionTarget, 0.1)
-    this.viewDistance = u.lerp(this.viewDistance, this.isShootingCamera() ? this.viewDistanceTargetShooting : this.viewDistanceTarget, 0.1)
+    this.viewDistance = u.lerp(this.viewDistance, this.isShootingCamera() ? this.viewDistanceTargetShooting : viewDistanceTarget, 0.1)
 
     const offsetPosition = [
       Math.cos(this.viewAngle[0]) * Math.cos(this.viewAngle[1]) * this.viewDistance,
@@ -117,6 +120,10 @@ export default class Background extends Thing {
     }
     if (game.keysPressed.ArrowDown || game.keysPressed.KeyS) {
       this.viewAngleTarget[1] -= Math.PI/8;
+    }
+    if (game.keysPressed.KeyQ || game.keysPressed.Space) {
+      this.zoomedCamera = !this.zoomedCamera;
+      soundmanager.playSound('switch', 1.0, 0.9);
     }
 
     this.updateCamera();

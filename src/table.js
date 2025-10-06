@@ -14,6 +14,7 @@ import CollectParticle from './particlecollect.js'
 import CollectedMarble from './collectedmarble.js'
 import drawText from './text.js'
 import StageSelectMenu from './menustage.js'
+import Announcement from './announcement.js'
 
 const SHOOT_TIME = 55;
 const MAX_SHOOT_POWER = 25;
@@ -244,7 +245,7 @@ export default class Table extends Thing {
       this.setPhase('shooting');
       this.readyToShoot = false; // Wait until player releases LMB before starting shot
       this.shootPower = 0;
-      this.viewPositionTargetShooting = this.selectedShootPosition;
+      game.getThing('background').viewPositionTargetShooting = this.selectedShootPosition;
       soundmanager.playSound('place', 0.8, 1);
 
       // Add platform and marble
@@ -297,6 +298,7 @@ export default class Table extends Thing {
       this.shootingMarble.shouldBeFrozen = true;
       this.shootingMarble = null;
       this.gotMarble = false;
+      this.gotExtraMove = false;
       this.waitUntilEndOfShot = 30;
       this.shootingPlatform.kill();
       this.getActiveInventory().splice(this.pickedMarbleIndex, 1);
@@ -312,6 +314,10 @@ export default class Table extends Thing {
     return true;
   }
 
+  noAnnouncements() {
+    return game.getThings().filter(x => x instanceof Announcement).length === 0;
+  }
+
   setWaitUntilEndOfShot(wait) {
     this.waitUntilEndOfShot = Math.max(this.waitUntilEndOfShot, wait);
   }
@@ -321,7 +327,7 @@ export default class Table extends Thing {
       this.waitUntilEndOfShot --;
       this.physicsHandler.stopAllMarbles(); // Make sure they're really stopped
     }
-    if (this.waitUntilEndOfShot <= 0) {
+    if (this.waitUntilEndOfShot <= 0 && this.noAnnouncements()) {
       this.physicsHandler.stopAllMarbles();
       if (this.getActiveInventory().length === 0 && this.getActiveInventoryQueue().length === 0) {
         this.setPhase('victory');
@@ -334,6 +340,10 @@ export default class Table extends Thing {
 
       if (this.movesLeft === 0 || this.getActiveInventory().length === 0) {
         this.activePlayer = this.activePlayer === 'p1' ? 'p2' : 'p1';
+        soundmanager.playSound('switch_players', 1.0, this.activePlayer === 'p1' ? 1.2 : 1.0);
+        if (!this.isSingleplayer) {
+          game.addThing(new Announcement('Switch Players!', 80, 2))
+        }
         this.movesLeft = 2;
         this.deQueueMarbles();
         
@@ -366,6 +376,7 @@ export default class Table extends Thing {
 
     if (this.phaseTime > 60*3 && game.mouse.leftClick) {
       game.addThing(new StageSelectMenu(!this.isSingleplayer))
+      soundmanager.playSound('menu', 1, 1);
       this.cleanUp()
     }
   }

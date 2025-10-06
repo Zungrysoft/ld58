@@ -11,6 +11,7 @@ import PaintParticle from './particlepaint.js'
 import CollectParticle from './particlecollect.js'
 import SmokeParticle from './particlesmoke.js'
 import SparkParticle from './particleSpark.js'
+import Announcement from './announcement.js'
 
 export const MARBLE_STOP_THRESHOLD = 0.04;
 
@@ -168,11 +169,28 @@ export default class Marble extends Thing {
   }
 
   collect() {
+    const table = game.getThing('table');
+
     if (this.isShot) {
       soundmanager.playSound('bad', 1, 1);
     }
     else {
-      soundmanager.playSound('collect', 1, 1);
+      if (this.type === 'bonus' && !table.gotExtraMove) {
+        if (table.getActiveInventory().length > 0) {
+          soundmanager.playSound('extra_turn', 1, 1);
+          table.movesLeft ++;
+          table.gotExtraMove = true;
+          game.addThing(new Announcement('Extra Turn!'), 70);
+        }
+        else {
+          soundmanager.playSound('collect', 1, 1);
+          game.addThing(new Announcement('No more marbles - skipping extra turn'), 40);
+        }
+      }
+      else {
+        soundmanager.playSound('collect', 1, 1);
+      }
+
       for (let i = 0; i < 15; i ++) {
         game.addThing(new CollectParticle(this.position, this.type))
       }
