@@ -439,7 +439,6 @@
         "stageTexture": null,
         "featureSymmetry": "mirror",
         "marbles": [
-            { "type": "bonus", "position": [4, 0, 1] },
             { "type": "basic", "position": [3, 0, 1] },
             { "type": "goal_p1", "position": [3, -0.8, 1] },
             { "type": "basic", "position": [3, -1.6, 1] },
@@ -454,12 +453,13 @@
             
             { "type": "basic", "position": [3.5, 4.7, 0] },
             { "type": "bonus", "position": [0, 4.7, 0] },
+            { "type": "evil", "position": [0, 6.3, 0] },
             { "type": "basic", "position": [-3.5, 4.7, 0] },
 
             { "type": "fire", "position": [-4.4, 3.2, 0] },
             { "type": "fire", "position": [-7, 0, 0] },
             { "type": "fire", "position": [7.7, 0, 0] },
-            { "type": "bonus", "position": [-2.8, 0, 0] },
+            { "type": "shock", "position": [-2.8, 2, 0] },
 
             { "type": "basic", "position": [-7.8, 0, 0] },
             { "type": "basic", "position": [-7.8, 1, 0] },
@@ -552,6 +552,8 @@
             { "type": "basic", "position": [0, 8, 0] },
 
 
+
+            { "type": "evil", "position": [-1.5, -2, 0] },
 
             { "type": "metal", "position": [-4, 7, 0] }
 
@@ -794,7 +796,6 @@
         ],
         "marbleCollection": [
             "plus_one",
-            "basic",
             "basic",
             "basic",
             "basic",

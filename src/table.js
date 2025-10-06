@@ -22,6 +22,8 @@ const MAX_SHOOT_POWER = 25;
 
 const COLLECTION_ANIMATION_DURATION = 25;
 
+const MAX_INVENTORY_SIZE = 12;
+
 export default class Table extends Thing {
   time = 0
   errorTime = 0
@@ -175,6 +177,11 @@ export default class Table extends Thing {
       }
     }
 
+    if (this.phase === 'picking' && this.prevSelectedMarble !== selectedMarble && selectedMarble < this.getActiveInventory().length && selectedMarble >= 0) {
+      soundmanager.playSound('menu3', 1, 1)
+    }
+    this.prevSelectedMarble = selectedMarble;
+
     // Simulate physics
     this.physicsHandler.simulateStep();
 
@@ -229,7 +236,7 @@ export default class Table extends Thing {
         this.playerWin = 'p1';
       }
     }
-    else {
+    else if (!(['evil'].includes(type))) {
       if (instantaneous) {
         this.getActiveInventory().push(type);
         this.inventoryTrayMarbleCollectionTimers[this.getActiveInventory().length - 1] = COLLECTION_ANIMATION_DURATION;
@@ -250,6 +257,16 @@ export default class Table extends Thing {
       this.getActiveInventory().push(this.getActiveInventoryQueue()[0]);
       this.getActiveInventoryQueue().splice(0, 1);
       this.inventoryTrayMarbleCollectionTimers[this.getActiveInventory().length - 1] = COLLECTION_ANIMATION_DURATION;
+    }
+
+    // Remove marbles if there are too many
+    // Prioritize basic marbles. Then just delete the oldest ones
+    while (this.getActiveInventory().length > MAX_INVENTORY_SIZE && this.getActiveInventory().includes('basic')) {
+      const ind = this.getActiveInventory().findIndex(x => x === 'basic');
+      this.getActiveInventory().splice(ind, 1);
+    }
+    while (this.getActiveInventory().length > MAX_INVENTORY_SIZE) {
+      this.getActiveInventory().splice(1, 1).findIndex(x => x !== 'plus_one');
     }
   }
 
@@ -431,7 +448,10 @@ export default class Table extends Thing {
           game.addThing(new Announcement('Switch Players!', 80, 2))
         }
         this.movesLeft = 2;
+
         this.deQueueMarbles();
+        this.isInventoryForfeit = false;
+        
 
         for (const thing of game.getThings().filter(x => x instanceof Structure)) {
           thing.turnsAlive ++;
@@ -472,6 +492,15 @@ export default class Table extends Thing {
     if (this.phaseTime > 60*3 && game.mouse.leftClick) {
       
       this.quit()
+    }
+  }
+
+  clearInventory() {
+    while (this.getActiveInventory().length > 1) {
+      this.getActiveInventory().splice(1, 1)
+    }
+    while (this.getActiveInventoryQueue().length > 0) {
+      this.getActiveInventory().splice(0, 1)
     }
   }
 

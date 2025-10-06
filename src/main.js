@@ -29,6 +29,7 @@ await game.loadAssets({
     uv_marble_rock: 'images/uv_marble_rock.png',
     uv_marble_shock: 'images/uv_marble_shock.png',
     uv_marble_metal: 'images/uv_marble_metal.png',
+    uv_marble_evil: 'images/uv_marble_evil.png',
   },
 
   models: {
@@ -84,6 +85,7 @@ await game.loadAssets({
     switch: 'sounds/switch.wav',
     switch_players: 'sounds/switch_players.wav',
     goal: 'sounds/goal.wav',
+    evil: 'sounds/evil.wav',
   },
 
   data: {

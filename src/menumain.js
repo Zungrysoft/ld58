@@ -10,6 +10,7 @@ import Menu from './menu.js'
 import StageSelectMenu from './menustage.js'
 import ControlsMenu from './menucontrols.js'
 import TutorialMenu from './menututorial.js'
+import GlossaryMenu from './menuglossary.js'
 
 
 export default class MainMenu extends Menu {
@@ -51,12 +52,17 @@ export default class MainMenu extends Menu {
     if (action === 'tutorial') {
       this.isDead = true;
       this.playClickSound();
-      game.addThing(new TutorialMenu(true))
+      game.addThing(new TutorialMenu())
     }
     if (action === 'controls') {
       this.isDead = true;
       this.playClickSound();
-      game.addThing(new ControlsMenu(true))
+      game.addThing(new ControlsMenu())
+    }
+    if (action === 'glossary') {
+      this.isDead = true;
+      this.playClickSound();
+      game.addThing(new GlossaryMenu())
     }
   }
 }

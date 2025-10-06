@@ -197,16 +197,27 @@ export default class Marble extends Thing {
     if (this.isShot) {
       soundmanager.playSound('bad', 1, 1);
     }
+    else if (this.type === 'evil') {
+      soundmanager.playSound('evil', 1, 1);
+      table.isInventoryForfeit = true;
+      table.movesLeft = 0;
+      table.clearInventory();
+      game.addThing(new Announcement('Lose Your Marbles!'), 70, 3);
+      table.addMarble('evil');
+    }
     else {
-      if (this.type === 'bonus' && !table.gotExtraMove) {
-        soundmanager.playSound('extra_turn', 1, 1);
-        table.movesLeft ++;
-        table.gotExtraMove = true;
-        game.addThing(new Announcement('Bonus Shot!'), 70, 3);
+      if (!table.isInventoryForfeit) {
+        if (this.type === 'bonus' && !table.gotExtraMove) {
+          soundmanager.playSound('extra_turn', 1, 1);
+          table.movesLeft ++;
+          table.gotExtraMove = true;
+          game.addThing(new Announcement('Bonus Shot!'), 70, 3);
+        }
+        else {
+          soundmanager.playSound('collect', 1, 1);
+        }
       }
-      else {
-        soundmanager.playSound('collect', 1, 1);
-      }
+      
 
       if (this.type.includes('goal')) {
         soundmanager.playSound('goal', 1, 1);
@@ -216,7 +227,7 @@ export default class Marble extends Thing {
         game.addThing(new CollectParticle(this.position, this.type))
       }
 
-      game.getThing('table').addMarble(this.type);
+      table.addMarble(this.type);
     }
     
 
