@@ -610,6 +610,8 @@
 
             { "type": "goal_p1", "position": [1, 0, 0] },
             { "type": "goal_p1", "position": [0, 1, 0] },
+            { "type": "basic", "position": [2, 0, 0] },
+            { "type": "basic", "position": [3, 0, 0] },
 
             
             { "type": "basic", "position": [-4, 0, 0] },
@@ -629,14 +631,9 @@
             "fire"
         ],
         "aiMarbleCollection": [
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic"
+            "fire",
+            "fire",
+            "fire"
         ],
         "aiIntelligence": {
             "simulations": 200,

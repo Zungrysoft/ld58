@@ -497,7 +497,7 @@ export default class Table extends Thing {
         // Decide what to do
         // const randomPath = this.shootZones[Math.floor(this.shootZones.length * Math.random())]
         // this.selectedShootPosition = vec2.pickRandomPoint(randomPath.polygon)
-        this.selectedShootPosition = [...vec2.pickRandomPoint(this.shootZones.map(x => x.polygon)), 1]
+        this.selectedShootPosition = [...vec2.pickRandomPoint(this.shootZones.map(x => x.polygon)), 0.2]
 
         let closestGoalMarble = null;
         let closestDist = 9999999999;
@@ -545,7 +545,7 @@ export default class Table extends Thing {
       soundmanager.playSound('place', 0.8, 1);
 
       // Add platform and marble
-      const pickedMarbleType = this.isDefensive ? 'basic' : this.getActiveInventory()[this.pickedMarbleIndex];
+      const pickedMarbleType = this.isDefensive ? this.getActiveInventory()[0] : this.getActiveInventory()[this.pickedMarbleIndex];
       this.shootingPlatform = game.addThing(new Structure('platform', null, this.selectedShootPosition));
       this.shootingMarble = game.addThing(new Marble(pickedMarbleType, [...this.selectedShootPosition]));
       this.physicsHandler.addStructure(this.shootingPlatform);
@@ -553,7 +553,8 @@ export default class Table extends Thing {
     }
 
     if (this.phaseTime === 80) {
-      const impulseForce = MAX_SHOOT_POWER * (this.isDefensive ? 0.5 : 1.03) * this.shootingMarble.getMass();
+      const rForce = Math.random() * 0.2 + 0.9
+      const impulseForce = MAX_SHOOT_POWER * (this.isDefensive ? 0.5 : 1.03) * this.shootingMarble.getMass() * rForce;
       const impulseDirection = vec3.normalize(vec3.subtract(this.selectedShootTargetPosition, this.selectedShootPosition));
       const impulse = vec3.scale(impulseDirection, impulseForce);
 
