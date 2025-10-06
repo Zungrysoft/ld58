@@ -24,6 +24,7 @@ await game.loadAssets({
     uv_marble_goal_p2: 'images/uv_marble_goal_p2.png',
     uv_marble_bonus: 'images/uv_marble_bonus.png',
     uv_marble_structure_ramp: 'images/uv_marble_structure_ramp.png',
+    uv_marble_structure_pillar: 'images/uv_marble_structure_pillar.png',
     uv_marble_fire: 'images/uv_marble_fire.png',
     uv_marble_rock: 'images/uv_marble_rock.png',
     uv_marble_shock: 'images/uv_marble_shock.png',
@@ -31,16 +32,21 @@ await game.loadAssets({
   },
 
   models: {
+    table1: 'models/table1.obj',
+    table2: 'models/table2.obj',
+    table3: 'models/table3.obj',
+    table4: 'models/table4.obj',
+
     cube: 'models/cube.obj',
     sphere: 'models/sphere.obj',
-    table1: 'models/table1.obj',
-    table_test_1: 'models/table_test_1.obj',
-    table_test_2: 'models/table_test_2.obj',
+    pyramid: 'models/pyramid.obj',
     skybox: 'models/skybox.obj',
     platform: 'models/platform.obj',
     aim: 'models/aim.obj',
     ramp: 'models/ramp.obj',
+    pillar: 'models/pillar.obj',
     pointer: 'models/pointer.obj',
+    plus_one: 'models/plus_one.obj',
 
     deco_mountains: 'models/deco_mountains.obj',
     deco_sand: 'models/deco_sand.obj',
@@ -64,12 +70,14 @@ await game.loadAssets({
     zap: 'sounds/zap.wav',
     menu: 'sounds/menu.wav',
     menu2: 'sounds/menu2.wav',
+    menu3: 'sounds/menu3.wav',
     transform: 'sounds/transform.wav',
     victory: 'sounds/victory.wav',
     defeat: 'sounds/defeat.wav',
     aim: 'sounds/aim.wav',
     switch: 'sounds/switch.wav',
     switch_players: 'sounds/switch_players.wav',
+    goal: 'sounds/goal.wav',
   },
 
   data: {

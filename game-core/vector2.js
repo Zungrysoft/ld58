@@ -350,3 +350,33 @@ export function isPointInPolygon(polygon, point) {
 
   return inside;
 }
+
+export function closestPointOnPath(path, point, maxDist) {
+  if (path.length < 2) return null;
+
+  const [px, py] = point;
+  let closest = null;
+  let minDistSq = maxDist * maxDist;
+
+  for (let i = 0; i < path.length - 1; i++) {
+    const [x1, y1] = path[i];
+    const [x2, y2] = path[i + 1];
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+
+    // Project point onto segment, clamped between 0 and 1
+    const t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
+    const clampedT = Math.max(0, Math.min(1, t));
+
+    const cx = x1 + clampedT * dx;
+    const cy = y1 + clampedT * dy;
+
+    const distSq = (px - cx) ** 2 + (py - cy) ** 2;
+    if (distSq < minDistSq) {
+      minDistSq = distSq;
+      closest = [cx, cy];
+    }
+  }
+
+  return closest;
+}

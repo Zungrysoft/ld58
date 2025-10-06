@@ -8,6 +8,8 @@ import Thing from 'thing'
 import { assets } from 'game'
 import Menu from './menu.js'
 import StageSelectMenu from './menustage.js'
+import ControlsMenu from './menucontrols.js'
+import TutorialMenu from './menututorial.js'
 
 
 export default class MainMenu extends Menu {
@@ -23,6 +25,10 @@ export default class MainMenu extends Menu {
     {
       text: 'Tutorial',
       action: 'tutorial',
+    },
+    {
+      text: 'Controls',
+      action: 'controls',
     },
     {
       text: 'Marble Glossary',
@@ -41,6 +47,16 @@ export default class MainMenu extends Menu {
       this.isDead = true;
       this.playClickSound();
       game.addThing(new StageSelectMenu(true))
+    }
+    if (action === 'tutorial') {
+      this.isDead = true;
+      this.playClickSound();
+      game.addThing(new TutorialMenu(true))
+    }
+    if (action === 'controls') {
+      this.isDead = true;
+      this.playClickSound();
+      game.addThing(new ControlsMenu(true))
     }
   }
 }

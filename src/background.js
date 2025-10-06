@@ -91,9 +91,12 @@ export default class Background extends Thing {
     cam.near = 0.1;
     cam.far = 1000;
 
-    const viewDistanceTarget = this.zoomedCamera ? this.viewDistanceTarget - 2 : this.viewDistanceTarget;
+    const viewDistanceTarget = this.viewDistanceTarget;
     this.viewAngleTarget[1] = u.clamp(this.viewAngleTarget[1], 0, Math.PI/2);
-    this.viewAngle = vec2.lerp(this.viewAngle, this.viewAngleTarget, 0.2);
+    this.viewAngle = [
+      vec2.lerpAngles(this.viewAngle[0], this.viewAngleTarget[0], 0.2),
+      vec2.lerpAngles(this.viewAngle[1], this.viewAngleTarget[1], 0.2),
+    ]
     this.viewPosition = vec3.lerp(this.viewPosition, this.isShootingCamera() ? this.viewPositionTargetShooting : this.viewPositionTarget, 0.1)
     this.viewDistance = u.lerp(this.viewDistance, this.isShootingCamera() ? this.viewDistanceTargetShooting : viewDistanceTarget, 0.1)
 
@@ -109,21 +112,36 @@ export default class Background extends Thing {
 
   updateCameraGame() {
     // Camera controls
-    if (game.keysPressed.ArrowRight || game.keysPressed.KeyD) {
-      this.viewAngleTarget[0] -= Math.PI/4;
+    if (game.keysDown.ArrowRight || game.keysDown.KeyD) {
+      this.viewAngleTarget[0] -= 0.04;
     }
-    if (game.keysPressed.ArrowLeft || game.keysPressed.KeyA) {
-      this.viewAngleTarget[0] += Math.PI/4;
+    if (game.keysPressed.ArrowLeft || game.keysDown.KeyA) {
+      this.viewAngleTarget[0] += 0.04;
     }
-    if (game.keysPressed.ArrowUp || game.keysPressed.KeyW) {
-      this.viewAngleTarget[1] += Math.PI/8;
+    if (game.keysDown.ArrowUp || game.keysDown.KeyW) {
+      this.viewAngleTarget[1] += 0.02;
     }
-    if (game.keysPressed.ArrowDown || game.keysPressed.KeyS) {
-      this.viewAngleTarget[1] -= Math.PI/8;
+    if (game.keysDown.ArrowDown || game.keysDown.KeyS) {
+      this.viewAngleTarget[1] -= 0.02;
     }
-    if (game.keysPressed.KeyQ || game.keysPressed.Space) {
+    if (game.keysDown.KeyQ) {
+      if (this.isShootingCamera()) {
+        this.viewDistanceTargetShooting = Math.max(this.viewDistanceTargetShooting - 0.18, 2);
+      }
+      else {
+        this.viewDistanceTarget = Math.max(this.viewDistanceTarget - 0.18, 2);
+      }
+    }
+    if (game.keysDown.KeyE) {
+      if (this.isShootingCamera()) {
+        this.viewDistanceTargetShooting = Math.min(this.viewDistanceTargetShooting + 0.18, 20);
+      }
+      else {
+        this.viewDistanceTarget = Math.min(this.viewDistanceTarget + 0.18, 20);
+      }
+    }
+    if (game.keysPressed.Space && ['shooting', 'shot'].includes(game.getThing('table')?.phase)) {
       this.zoomedCamera = !this.zoomedCamera;
-      soundmanager.playSound('switch', 1.0, 0.9);
     }
 
     this.updateCamera();

@@ -25,6 +25,7 @@ export default class Menu extends Thing {
 
   buttonOffsets = []
   time = 0
+  prevSelectedAction = null
 
   update() {
     this.time ++;
@@ -44,6 +45,11 @@ export default class Menu extends Thing {
         
       }
     }
+
+    if (this.buttons[selectedButton]?.action && this.buttons[selectedButton]?.action !== this.prevSelectedAction) {
+      soundmanager.playSound('menu3', 1, 1);
+    }
+    this.prevSelectedAction = this.buttons[selectedButton]?.action;
   }
 
   menuEvent() {}

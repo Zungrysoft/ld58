@@ -12,6 +12,7 @@ import CollectParticle from './particlecollect.js'
 import SmokeParticle from './particlesmoke.js'
 import SparkParticle from './particleSpark.js'
 import Announcement from './announcement.js'
+import ShrapnelParticle from './particleShrapnel.js'
 
 export const MARBLE_STOP_THRESHOLD = 0.04;
 
@@ -38,7 +39,7 @@ export function getMarbleScale(type) {
 
 export function getMarbleDensity(type) {
   if (type.includes('goal')) {
-    return 0.9;
+    return 1.1;
   }
   if (type.includes('metal')) {
     return 20;
@@ -107,6 +108,8 @@ export default class Marble extends Thing {
           game.addThing(new PaintParticle(this.position, [1, 1, 1, 1]))
         }
 
+        soundmanager.playSound('transform', 1, 0.7);
+
         game.getThing('table').setWaitUntilEndOfShot(60);
       }
     }
@@ -170,6 +173,20 @@ export default class Marble extends Thing {
         ph.applyImpulse(marble, impulse);
       }
     }
+
+    // Particles
+    for (let i = 0; i < 22; i ++) {
+      const radius = this.scale * 0.9;
+      const smokePos = [
+        Math.random() * radius * 2 - radius,
+        Math.random() * radius * 2 - radius,
+        Math.random() * radius * 2 - radius,
+      ]
+      if (i < 5) {
+        game.addThing(new SmokeParticle(vec3.add(this.position, smokePos), 2))
+      }
+      game.addThing(new ShrapnelParticle(vec3.add(this.position, smokePos)))
+    }
   }
 
   collect() {
@@ -181,19 +198,17 @@ export default class Marble extends Thing {
     }
     else {
       if (this.type === 'bonus' && !table.gotExtraMove) {
-        if (table.getActiveInventory().length > 0) {
-          soundmanager.playSound('extra_turn', 1, 1);
-          table.movesLeft ++;
-          table.gotExtraMove = true;
-          game.addThing(new Announcement('Bonus Shot!'), 70, 3);
-        }
-        else {
-          soundmanager.playSound('collect', 1, 1);
-          game.addThing(new Announcement('No more marbles - skipping bonus shot'), 40, 3);
-        }
+        soundmanager.playSound('extra_turn', 1, 1);
+        table.movesLeft ++;
+        table.gotExtraMove = true;
+        game.addThing(new Announcement('Bonus Shot!'), 70, 3);
       }
       else {
         soundmanager.playSound('collect', 1, 1);
+      }
+
+      if (this.type.includes('goal')) {
+        soundmanager.playSound('goal', 1, 1);
       }
 
       for (let i = 0; i < 15; i ++) {

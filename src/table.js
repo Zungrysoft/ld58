@@ -58,6 +58,10 @@ export default class Table extends Thing {
     this.inventoryP1 = [...levelData.marbleCollection];
     this.inventoryP2 = this.isSingleplayer ? [...levelData.aiMarbleCollection] : [...levelData.marbleCollection];
 
+    if (!this.isSingleplayer) {
+      this.movesLeft = 1;
+    }
+
     this.shootZones = levelData.shootZones;
     if (levelData.featureSymmetry) {
       const pShootZones = [...this.shootZones];
@@ -209,7 +213,7 @@ export default class Table extends Thing {
     return this.inventoryQueueP2;
   }
 
-  addMarble(type) {
+  addMarble(type, instantaneous) {
     this.gotMarble = true;
 
     if (type === 'goal_p1') {
@@ -225,10 +229,17 @@ export default class Table extends Thing {
       }
     }
     else {
-      this.getActiveInventoryQueue().push(type);
+      if (instantaneous) {
+        this.getActiveInventory().push(type);
+        this.inventoryTrayMarbleCollectionTimers[this.getActiveInventory().length - 1] = COLLECTION_ANIMATION_DURATION;
+      }
+      else {
+        this.getActiveInventoryQueue().push(type);
+      }
+      
     }
 
-    if (this.phase !== 'victory') {
+    if (this.phase !== 'victory' /* && !instantaneous */) {
       game.addThing(new CollectedMarble(type, this.activePlayer === 'p1' ? 'right' : 'left'));
     }
   }
@@ -253,9 +264,21 @@ export default class Table extends Thing {
   updatePicking() {
     const selectedMarble = this.getSelectedMarble();
     if (game.mouse.leftClick && selectedMarble < this.getActiveInventory().length && selectedMarble >= 0) {
-      this.setPhase('positioning');
-      this.pickedMarbleIndex = selectedMarble;
-      soundmanager.playSound('pick', 1.0, 1.0)
+      if (this.getActiveInventory()[selectedMarble] === 'plus_one') {
+        this.setPhase('picking');
+        this.addMarble('basic');
+        soundmanager.playSound('collect', 1, 1);
+        this.movesLeft --;
+        if (this.movesLeft === 0) {
+          this.waitUntilEndOfShot = 20;
+          this.setPhase('shot')
+        }
+      }
+      else {
+        this.setPhase('positioning');
+        this.pickedMarbleIndex = selectedMarble;
+        soundmanager.playSound('pick', 1.0, 1.0)
+      }
     }
   }
 
@@ -269,13 +292,29 @@ export default class Table extends Thing {
     const cameraRay = game.getCamera3D().getMouseRay();
 
     this.selectedShootPosition = null;
+    let potentialPathPoints = [];
+    let potentialPathDistances = [];
     for (const shootZone of this.shootZones) {
       const pointOnPlane = vec3.pointAtZ(cameraPos, cameraRay, shootZone.height);
 
-      if (vec2.isPointInPolygon(shootZone.polygon, pointOnPlane)) {
-        this.selectedShootPosition = pointOnPlane;
-        break;
+      const pathPoint = vec2.closestPointOnPath(shootZone.polygon, pointOnPlane, 3);
+      if (pathPoint) {
+        potentialPathPoints.push([...pathPoint, pointOnPlane[2]]);
+        potentialPathDistances.push(vec2.distance(pathPoint, pointOnPlane))
       }
+    }
+
+    if (potentialPathPoints.length > 0) {
+      let best = null;
+      let bestDist = 99999;
+      for (let i = 0; i < potentialPathPoints.length; i ++) {
+        if (potentialPathDistances[i] < bestDist) {
+          bestDist = potentialPathDistances[i];
+          best = potentialPathPoints[i];
+        }
+      }
+      
+      this.selectedShootPosition = best;
     }
 
     if (game.mouse.leftClick && this.selectedShootPosition && this.phaseTime > 5) {
@@ -367,12 +406,12 @@ export default class Table extends Thing {
     }
     if (this.waitUntilEndOfShot <= 0 && this.noAnnouncements()) {
       this.physicsHandler.stopAllMarbles();
-      if (this.getActiveInventory().length === 0 && this.getActiveInventoryQueue().length === 0) {
-        this.setPhase('victory');
-        this.playerWin = this.activePlayer === 'p1' ? 'p2' : 'p1';
-        this.winFromRunOut = true;
-        return;
-      }
+      // if (this.getActiveInventory().length === 0 && this.getActiveInventoryQueue().length === 0) {
+      //   this.setPhase('victory');
+      //   this.playerWin = this.activePlayer === 'p1' ? 'p2' : 'p1';
+      //   this.winFromRunOut = true;
+      //   return;
+      // }
       this.setPhase('picking');
 
       if (this.movesLeft === 0 || this.getActiveInventory().length === 0) {
@@ -479,6 +518,7 @@ export default class Table extends Thing {
 
     // Inventory
     let xPos = 9.2;
+
     
     let i = 0;
     for (const marbleType of this.getActiveInventory()) {
@@ -487,14 +527,27 @@ export default class Table extends Thing {
         collectScale = u.map(this.inventoryTrayMarbleCollectionTimers[i] ?? 0, COLLECTION_ANIMATION_DURATION, 0, 0, 1.2);
       }
       
-      render.drawUIMesh({
-        mesh: assets.meshes.sphere,
-        texture: assets.textures['uv_marble_' + marbleType] ?? assets.textures.square,
-        position: [xPos*this.invScale(), -10.4, -3.7 + (this.inventoryTrayPosition * 1.7) + ((this.inventoryTrayMarbleHeights[i] ?? 0) * 0.7)],
-        scale: 2 * getMarbleScale(marbleType) * collectScale,
-        rotation: [0, 0, 0],
-        unshaded: getMarbleUnshaded(marbleType),
-      })
+      if (marbleType === 'plus_one') {
+        render.drawUIMesh({
+          mesh: assets.meshes.plus_one,
+          texture: assets.textures.square,
+          position: [xPos*this.invScale(), -10.4, -3.7 + (this.inventoryTrayPosition * 1.7) + ((this.inventoryTrayMarbleHeights[0]) * 0.7)],
+          scale: 2,
+          rotation: [0, 0, Math.PI],
+          color: [0, 0.9, 0, 1],
+          unshaded: false,
+        })
+      }
+      else {
+        render.drawUIMesh({
+          mesh: assets.meshes.sphere,
+          texture: assets.textures['uv_marble_' + marbleType] ?? assets.textures.square,
+          position: [xPos*this.invScale(), -10.4, -3.7 + (this.inventoryTrayPosition * 1.7) + ((this.inventoryTrayMarbleHeights[i] ?? 0) * 0.7)],
+          scale: 2 * getMarbleScale(marbleType) * collectScale,
+          rotation: [0, 0, 0],
+          unshaded: getMarbleUnshaded(marbleType),
+        })
+      }
 
       if (['positioning', 'shooting'].includes(this.phase) && i === this.pickedMarbleIndex) {
         render.drawUIMesh({
