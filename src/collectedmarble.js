@@ -13,7 +13,7 @@ export default class CollectedMarble extends Thing {
 
     this.type = type ?? 'basic';
 
-    let xScale = mode === 'left' ? -1 : 1;
+    let xScale = mode === 'left' ? 1 : -1;
 
     if (mode === 'victory') {
       this.position = [

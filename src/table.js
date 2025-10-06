@@ -128,11 +128,13 @@ export default class Table extends Thing {
         }
         
         let mirrorType = marble.type;
-        if (mirrorType.includes('p1')) {
-          mirrorType = mirrorType.replace('p1', 'p2')
-        }
-        else if (mirrorType.includes('p2')) {
-          mirrorType = mirrorType.replace('p2', 'p1')
+        if (!levelData.noTeamMirror) {
+          if (mirrorType.includes('p1')) {
+            mirrorType = mirrorType.replace('p1', 'p2')
+          }
+          else if (mirrorType.includes('p2')) {
+            mirrorType = mirrorType.replace('p2', 'p1')
+          }
         }
         game.addThing(new Marble(mirrorType, mirrorPosition));
       }
