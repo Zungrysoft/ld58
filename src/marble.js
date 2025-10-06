@@ -16,7 +16,7 @@ import ShrapnelParticle from './particleShrapnel.js'
 
 export const MARBLE_STOP_THRESHOLD = 0.04;
 
-export const FIRE_MARBLE_SPEED_THRESHOLD = 1.8;
+export const FIRE_MARBLE_SPEED_THRESHOLD = 0.1;
 export const SHOCK_FORCE = 15;
 export const SHOCK_RANGE = 3;
 
@@ -58,23 +58,35 @@ export default class Marble extends Thing {
   time = 0
   tableTouchTime = 999999
 
-  constructor (type, position, velocity) {
+  constructor (type, position, isShot) {
     super()
 
     this.type = type ?? 'basic';
 
+    this.isShot = isShot;
     this.density = getMarbleDensity(type);
     this.scale = getMarbleScale(type);
+    
 
     this.position = [...(position ?? [0, 0, 0])];
     this.position[2] += this.scale * 0.5 + 0.1;
-    this.velocity = [...(velocity ?? [0, 0, 0])];
+    this.velocity = [0, 0, 0];
 
     this.rotation = [0, 0, 0];
   }
 
   getMass() {
-    return (4 / 3) * Math.PI * ((this.scale / 2) ** 3) * 15.18 * this.density;
+    const shooterMult = this.isShot ? 1 : 1
+    return (4 / 3) * Math.PI * ((this.scale / 2) ** 3) * 15.18 * this.density * shooterMult;
+  }
+
+  isNotShot() {
+    this.isShot = false;
+    this.updateMass();
+  }
+
+  updateMass() {
+    game.getThing('table').physicsHandler.updateMarbleMass(this)
   }
 
   update () {

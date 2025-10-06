@@ -230,15 +230,28 @@ export default class MarblePhysicsHandler {
   freezeMarble(marbleObj) {
     const body = this.marbles.get(marbleObj);
 
-    body.mass = 0;
-    body.updateMassProperties();
+    if (body) {
+      body.mass = 0;
+      body.updateMassProperties();
+    }
   }
 
   unfreezeMarble(marbleObj) {
     const body = this.marbles.get(marbleObj);
 
-    body.mass = marbleObj.getMass();
-    body.updateMassProperties();
+    if (body) {
+      body.mass = marbleObj.getMass();
+      body.updateMassProperties();
+    }
+  }
+
+  updateMarbleMass(marbleObj) {
+    const body = this.marbles.get(marbleObj);
+
+    if (body) {
+      body.mass = marbleObj.getMass();
+      body.updateMassProperties();
+    }
   }
 
   addStructure(structureObj) {

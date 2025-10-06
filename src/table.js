@@ -18,7 +18,7 @@ import Announcement from './announcement.js'
 import QuitButton from './quitbutton.js'
 
 const SHOOT_TIME = 55;
-const MAX_SHOOT_POWER = 25;
+const MAX_SHOOT_POWER = 30;
 
 const COLLECTION_ANIMATION_DURATION = 25;
 
@@ -356,7 +356,7 @@ export default class Table extends Thing {
 
       // Add platform and marble
       this.shootingPlatform = game.addThing(new Structure('platform', null, this.selectedShootPosition));
-      this.shootingMarble = game.addThing(new Marble(this.getActiveInventory()[this.pickedMarbleIndex], [...this.selectedShootPosition]));
+      this.shootingMarble = game.addThing(new Marble(this.getActiveInventory()[this.pickedMarbleIndex], [...this.selectedShootPosition], true));
       this.physicsHandler.addStructure(this.shootingPlatform);
       this.physicsHandler.addMarble(this.shootingMarble);
     }
@@ -400,7 +400,6 @@ export default class Table extends Thing {
       const impulse = vec3.scale(impulseDirection, impulseForce);
 
       this.physicsHandler.applyImpulse(this.shootingMarble, impulse);
-      this.shootingMarble.isShot = true;
       this.shootingMarble.shouldBeFrozen = true;
       this.shootingMarble = null;
       this.gotMarble = false;
@@ -469,7 +468,7 @@ export default class Table extends Thing {
         // Unfreeze all marbles
         for (const thing of game.getThings().filter(x => x instanceof Marble)) {
           thing.unfreeze();
-          thing.isShot = false;
+          thing.isNotShot();
         }
       }
       else {
@@ -547,7 +546,7 @@ export default class Table extends Thing {
       // Add platform and marble
       const pickedMarbleType = this.isDefensive ? this.getActiveInventory()[0] : this.getActiveInventory()[this.pickedMarbleIndex];
       this.shootingPlatform = game.addThing(new Structure('platform', null, this.selectedShootPosition));
-      this.shootingMarble = game.addThing(new Marble(pickedMarbleType, [...this.selectedShootPosition]));
+      this.shootingMarble = game.addThing(new Marble(pickedMarbleType, [...this.selectedShootPosition]), true);
       this.physicsHandler.addStructure(this.shootingPlatform);
       this.physicsHandler.addMarble(this.shootingMarble);
     }
@@ -559,7 +558,6 @@ export default class Table extends Thing {
       const impulse = vec3.scale(impulseDirection, impulseForce);
 
       this.physicsHandler.applyImpulse(this.shootingMarble, impulse);
-      this.shootingMarble.isShot = true;
       this.shootingMarble.shouldBeFrozen = true;
       this.shootingMarble = null;
       this.gotMarble = false;
