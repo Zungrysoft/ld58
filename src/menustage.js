@@ -19,6 +19,7 @@ export default class StageSelectMenu extends Menu {
   constructor(isMultiplayer) {
     super()
 
+    this.isMultiplayer = isMultiplayer;
     const levelsList = isMultiplayer ? game.assets.data.stageListMultiplayer : game.assets.data.stageListSingleplayer;
     this.buttons = levelsList.map(x => ({
       text: game.assets.data.stages[x].title,
@@ -30,7 +31,7 @@ export default class StageSelectMenu extends Menu {
       action: 'back',
     })
 
-    this.header = isMultiplayer ? 'Select Arena' : 'Select Stage';
+    this.header = isMultiplayer ? 'Select Arena' : 'Select Level';
   }
 
   menuEvent(action) {
@@ -42,7 +43,7 @@ export default class StageSelectMenu extends Menu {
     else {
       this.isDead = true
       this.playClickSound();
-      game.addThing(new Table(game.assets.data.stages[action]))
+      game.addThing(new Table(game.assets.data.stages[action], !this.isMultiplayer))
     }
   }
 }

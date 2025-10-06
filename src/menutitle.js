@@ -72,6 +72,7 @@ export default class TitleMenu extends Menu {
       if (Math.random() < 0.05) {marbleType = 'metal'}
       if (Math.random() < 0.1) {marbleType = 'shock'}
       if (Math.random() < 0.04) {marbleType = 'bonus'}
+      if (Math.random() < 0.01) {marbleType = 'evil'}
 
       game.addThing(new CollectedMarble(marbleType, 'victory'));
     }

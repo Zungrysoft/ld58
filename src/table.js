@@ -48,11 +48,11 @@ export default class Table extends Thing {
   movesLeft = 2
   noZoom = false
 
-  constructor (levelData) {
+  constructor (levelData, isSingleplayer) {
     super()
     game.setThingName(this, 'table')
 
-    this.isSingleplayer = levelData.isSingleplayer;
+    this.isSingleplayer = isSingleplayer;
     this.title = levelData.title;
     this.mesh = levelData.stageMesh;
     this.texture = levelData.stageTexture;
@@ -199,6 +199,9 @@ export default class Table extends Thing {
     }
     else if (this.phase === 'victory') {
       this.updateVictory();
+    }
+    else if (this.phase === 'ai') {
+      this.updateAi();
     }
   }
 
@@ -439,7 +442,7 @@ export default class Table extends Thing {
       //   this.winFromRunOut = true;
       //   return;
       // }
-      this.setPhase('picking');
+      
 
       if (this.movesLeft === 0 || this.getActiveInventory().length === 0) {
         this.activePlayer = this.activePlayer === 'p1' ? 'p2' : 'p1';
@@ -474,6 +477,70 @@ export default class Table extends Thing {
           }
         }
       }
+
+      if (this.activePlayer === 'p2' && this.isSingleplayer) {
+        this.setPhase('ai');
+      }
+      else {
+        this.setPhase('picking');
+      }
+    }
+  }
+
+  updateAi() {
+
+    if (this.phaseTime === 30) {
+      // Decide what to do
+      // const randomPath = this.shootZones[Math.floor(this.shootZones.length * Math.random())]
+      // this.selectedShootPosition = vec2.pickRandomPoint(randomPath.polygon)
+      this.selectedShootPosition = [...vec2.pickRandomPoint(this.shootZones.map(x => x.polygon)), 1]
+
+      let closestGoalMarble = null;
+      let closestDist = 9999999999;
+      for (const marble of game.getThings().filter(x => x instanceof Marble && x.type.includes('goal'))) {
+        let dist = vec3.distance(this.selectedShootPosition, marble.position);
+        if (marble.isFrozen) {
+          dist += 1000
+        }
+
+        if (dist < closestDist) {
+          closestDist = dist;
+          closestGoalMarble = marble;
+        }
+      }
+      this.selectedShootTargetPosition = [...closestGoalMarble.position]
+      
+      this.isDefensive = closestGoalMarble?.type === 'goal_p2'
+
+      this.pickedMarbleIndex = Math.floor(Math.random() * this.getActiveInventory().length)
+      const pickedMarbleType = this.isDefensive ? 'basic' : this.getActiveInventory()[this.pickedMarbleIndex];
+
+
+      this.noZoom = true
+      soundmanager.playSound('place', 0.8, 1);
+
+      // Add platform and marble
+      this.shootingPlatform = game.addThing(new Structure('platform', null, this.selectedShootPosition));
+      this.shootingMarble = game.addThing(new Marble(pickedMarbleType, [...this.selectedShootPosition]));
+      this.physicsHandler.addStructure(this.shootingPlatform);
+      this.physicsHandler.addMarble(this.shootingMarble);
+    }
+
+    if (this.phaseTime === 80) {
+      const impulseForce = MAX_SHOOT_POWER * (this.isDefensive ? 0.5 : 1.1) * this.shootingMarble.getMass();
+      const impulseDirection = vec3.normalize(vec3.subtract(this.selectedShootTargetPosition, this.selectedShootPosition));
+      const impulse = vec3.scale(impulseDirection, impulseForce);
+
+      this.physicsHandler.applyImpulse(this.shootingMarble, impulse);
+      this.shootingMarble.isShot = true;
+      this.shootingMarble.shouldBeFrozen = true;
+      this.shootingMarble = null;
+      this.gotMarble = false;
+      this.gotExtraMove = false;
+      this.movesLeft --;
+      this.waitUntilEndOfShot = 5;
+
+      this.setPhase('shot');
     }
   }
 

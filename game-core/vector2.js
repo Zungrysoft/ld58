@@ -380,3 +380,54 @@ export function closestPointOnPath(path, point, maxDist) {
 
   return closest;
 }
+
+export function pickRandomPoint(paths) {
+  if (!Array.isArray(paths) || paths.length === 0) {
+    throw new Error("paths must be a non-empty array");
+  }
+
+  // Compute total length of all paths
+  const pathLengths = paths.map(path => {
+    let len = 0;
+    for (let i = 0; i < path.length - 1; i++) {
+      const [x1, y1] = path[i];
+      const [x2, y2] = path[i + 1];
+      len += Math.hypot(x2 - x1, y2 - y1);
+    }
+    return len;
+  });
+
+  const totalLength = pathLengths.reduce((a, b) => a + b, 0);
+  if (totalLength === 0) throw new Error("all paths have zero length");
+
+  // Pick a random position along total length
+  let target = Math.random() * totalLength;
+
+  // Find which path the target falls into
+  let pathIndex = 0;
+  while (target > pathLengths[pathIndex]) {
+    target -= pathLengths[pathIndex];
+    pathIndex++;
+  }
+
+  const path = paths[pathIndex];
+
+  // Now find which segment within the chosen path
+  for (let i = 0; i < path.length - 1; i++) {
+    const [x1, y1] = path[i];
+    const [x2, y2] = path[i + 1];
+    const segLen = Math.hypot(x2 - x1, y2 - y1);
+
+    if (target <= segLen) {
+      const t = segLen === 0 ? 0 : target / segLen;
+      const x = x1 + t * (x2 - x1);
+      const y = y1 + t * (y2 - y1);
+      return [x, y];
+    }
+    target -= segLen;
+  }
+
+  // Fallback: return last point of last path
+  return path[path.length - 1];
+}
+

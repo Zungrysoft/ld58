@@ -97,8 +97,8 @@ export default class GlossaryMenu extends Menu {
       description: [
         'Collect all of your opponents\' Goal Marbles to win the game!',
         '',
-        'Tip: You move your own Goal Marbles around or put other marbles',
-        'in front of them to protect them.',
+        'Tip: You can move your own Goal Marbles around or put other',
+        'marbles in front of them to protect them.',
       ]
     },
   ]

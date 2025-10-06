@@ -23,18 +23,11 @@
             "basic",
             "basic",
             "basic",
-            "basic",
-            "shock"
+            "basic"
         ],
         "aiMarbleCollection": [
             "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic"
+            "shock"
         ],
         "aiIntelligence": {
             "simulations": 200,
