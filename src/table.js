@@ -226,6 +226,7 @@ export default class Table extends Thing {
 
   addMarble(type, instantaneous) {
     this.gotMarble = true;
+    const isAiTurn = this.isSingleplayer && this.activePlayer !== 'p1';
 
     if (type === 'goal_p1') {
       if (game.getThings().filter(x => x instanceof Marble && !x.isDead && x.type === 'goal_p1').length === 0) {
@@ -239,7 +240,7 @@ export default class Table extends Thing {
         this.playerWin = 'p1';
       }
     }
-    else if (!(['evil'].includes(type))) {
+    else if (!(['evil'].includes(type)) && !isAiTurn) {
       if (instantaneous) {
         this.getActiveInventory().push(type);
         this.inventoryTrayMarbleCollectionTimers[this.getActiveInventory().length - 1] = COLLECTION_ANIMATION_DURATION;
@@ -250,7 +251,7 @@ export default class Table extends Thing {
       
     }
 
-    if (this.phase !== 'victory' /* && !instantaneous */) {
+    if (this.phase !== 'victory' && !isAiTurn /* && !instantaneous */) {
       game.addThing(new CollectedMarble(type, this.activePlayer === 'p1' ? 'right' : 'left'));
     }
   }
@@ -490,36 +491,59 @@ export default class Table extends Thing {
   updateAi() {
 
     if (this.phaseTime === 30) {
-      // Decide what to do
-      // const randomPath = this.shootZones[Math.floor(this.shootZones.length * Math.random())]
-      // this.selectedShootPosition = vec2.pickRandomPoint(randomPath.polygon)
-      this.selectedShootPosition = [...vec2.pickRandomPoint(this.shootZones.map(x => x.polygon)), 1]
+      for (let i = 0; i < 30; i ++) {
+        // Decide what to do
+        // const randomPath = this.shootZones[Math.floor(this.shootZones.length * Math.random())]
+        // this.selectedShootPosition = vec2.pickRandomPoint(randomPath.polygon)
+        this.selectedShootPosition = [...vec2.pickRandomPoint(this.shootZones.map(x => x.polygon)), 1]
 
-      let closestGoalMarble = null;
-      let closestDist = 9999999999;
-      for (const marble of game.getThings().filter(x => x instanceof Marble && x.type.includes('goal'))) {
-        let dist = vec3.distance(this.selectedShootPosition, marble.position);
-        if (marble.isFrozen) {
-          dist += 1000
+        let closestGoalMarble = null;
+        let closestDist = 9999999999;
+        for (const marble of game.getThings().filter(x => x instanceof Marble && x.type.includes('goal'))) {
+          let dist = vec3.distance(this.selectedShootPosition, marble.position);
+          if (marble.isFrozen) {
+            dist += 1000
+          }
+
+          if (dist < closestDist) {
+            closestDist = dist;
+            closestGoalMarble = marble;
+          }
+        }
+        this.selectedShootTargetPosition = [...closestGoalMarble.position]
+        
+        this.isDefensive = closestGoalMarble?.type === 'goal_p2'
+
+        // Prefer offensive plays
+        if (this.isDefensive && Math.random() < 0.6) {
+          continue
         }
 
-        if (dist < closestDist) {
-          closestDist = dist;
-          closestGoalMarble = marble;
+        this.pickedMarbleIndex = Math.floor(Math.random() * this.getActiveInventory().length)
+        
+
+        // If this will put the marble closer to where we want it to go, do it.
+        const dir = vec3.normalize(vec3.subtract(this.selectedShootTargetPosition, this.selectedShootPosition))
+        const willTakeMarbleFurther = vec3.magnitude(this.selectedShootTargetPosition) <
+          vec3.magnitude(vec3.add(this.selectedShootTargetPosition, dir))
+        if (willTakeMarbleFurther && !this.isDefensive) {
+          // console.log(this.selectedShootTargetPosition, dir, willTakeMarbleFurther, this.isDefensive)
+          break;
         }
+        if (!willTakeMarbleFurther && this.isDefensive) {
+          // console.log(this.selectedShootTargetPosition, dir, willTakeMarbleFurther, this.isDefensive)
+          break;
+        }
+
+        
+        
       }
-      this.selectedShootTargetPosition = [...closestGoalMarble.position]
-      
-      this.isDefensive = closestGoalMarble?.type === 'goal_p2'
-
-      this.pickedMarbleIndex = Math.floor(Math.random() * this.getActiveInventory().length)
-      const pickedMarbleType = this.isDefensive ? 'basic' : this.getActiveInventory()[this.pickedMarbleIndex];
-
 
       this.noZoom = true
       soundmanager.playSound('place', 0.8, 1);
 
       // Add platform and marble
+      const pickedMarbleType = this.isDefensive ? 'basic' : this.getActiveInventory()[this.pickedMarbleIndex];
       this.shootingPlatform = game.addThing(new Structure('platform', null, this.selectedShootPosition));
       this.shootingMarble = game.addThing(new Marble(pickedMarbleType, [...this.selectedShootPosition]));
       this.physicsHandler.addStructure(this.shootingPlatform);
@@ -527,7 +551,7 @@ export default class Table extends Thing {
     }
 
     if (this.phaseTime === 80) {
-      const impulseForce = MAX_SHOOT_POWER * (this.isDefensive ? 0.5 : 1.1) * this.shootingMarble.getMass();
+      const impulseForce = MAX_SHOOT_POWER * (this.isDefensive ? 0.5 : 1.03) * this.shootingMarble.getMass();
       const impulseDirection = vec3.normalize(vec3.subtract(this.selectedShootTargetPosition, this.selectedShootPosition));
       const impulse = vec3.scale(impulseDirection, impulseForce);
 
