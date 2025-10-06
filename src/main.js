@@ -40,6 +40,7 @@ await game.loadAssets({
     platform: 'models/platform.obj',
     aim: 'models/aim.obj',
     ramp: 'models/ramp.obj',
+    pointer: 'models/pointer.obj',
 
     deco_mountains: 'models/deco_mountains.obj',
     deco_sand: 'models/deco_sand.obj',

@@ -19,6 +19,10 @@
         ],
         "marbleSymmetry": "rotate",
         "marbleCollection": [
+            "basic",
+            "basic",
+            "basic",
+            "basic",
             "basic"
         ],
         "aiMarbleCollection": [

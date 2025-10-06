@@ -13,6 +13,8 @@ export default class CollectedMarble extends Thing {
 
     this.type = type ?? 'basic';
 
+    let xScale = mode === 'left' ? -1 : 1;
+
     if (mode === 'victory') {
       this.position = [
         -6 + Math.random()*12,
@@ -39,12 +41,12 @@ export default class CollectedMarble extends Thing {
     }
     else {
       this.position = [
-        -6 + Math.random()*3,
+        (-6 + Math.random()*3) * xScale,
         -10.4,
         -6.7,
       ]
       this.velocity = [
-        -0.04 - Math.random()*0.04,
+        (-0.04 - Math.random()*0.04) * xScale,
         0,
         0.6 + Math.random() * 0.08,
       ]

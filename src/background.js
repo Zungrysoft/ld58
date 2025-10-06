@@ -91,7 +91,7 @@ export default class Background extends Thing {
     cam.near = 0.1;
     cam.far = 1000;
 
-    const viewDistanceTarget = this.zoomedCamera ? this.viewDistanceTarget - 4 : this.viewDistanceTarget;
+    const viewDistanceTarget = this.zoomedCamera ? this.viewDistanceTarget - 2 : this.viewDistanceTarget;
     this.viewAngleTarget[1] = u.clamp(this.viewAngleTarget[1], 0, Math.PI/2);
     this.viewAngle = vec2.lerp(this.viewAngle, this.viewAngleTarget, 0.2);
     this.viewPosition = vec3.lerp(this.viewPosition, this.isShootingCamera() ? this.viewPositionTargetShooting : this.viewPositionTarget, 0.1)

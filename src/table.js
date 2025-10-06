@@ -180,20 +180,25 @@ export default class Table extends Thing {
 
   addMarble(type) {
     this.gotMarble = true;
-    
-    this.getActiveInventoryQueue().push(type);
 
     if (type === 'goal_p1') {
-      this.playerWin = 'p2';
-      this.setPhase('victory');
+      if (game.getThings().filter(x => x instanceof Marble && !x.isDead && x.type === 'goal_p1').length === 0) {
+        this.setPhase('victory');
+        this.playerWin = 'p2';
+      }
     }
     else if (type === 'goal_p2') {
-      this.playerWin = 'p1';
-      this.setPhase('victory');
+      if (game.getThings().filter(x => x instanceof Marble && !x.isDead && x.type === 'goal_p2').length === 0) {
+        this.setPhase('victory');
+        this.playerWin = 'p1';
+      }
     }
-    
+    else {
+      this.getActiveInventoryQueue().push(type);
+    }
+
     if (this.phase !== 'victory') {
-      game.addThing(new CollectedMarble(type));
+      game.addThing(new CollectedMarble(type, this.activePlayer === 'p1' ? 'right' : 'left'));
     }
   }
 
@@ -207,8 +212,9 @@ export default class Table extends Thing {
 
   getSelectedMarble() {
     const SPACING = 70;
+    const mousePosX = this.activePlayer === 'p1' ? game.mouse.position[0] : game.config.width - game.mouse.position[0];
     if (game.mouse.position[1] < (game.config.height - 40) && game.mouse.position[1] > (game.config.height - 120)) {
-      return Math.floor((game.mouse.position[0] - 15) / SPACING);
+      return Math.floor((mousePosX - 15) / SPACING);
     }
     return -1;
   }
@@ -299,6 +305,7 @@ export default class Table extends Thing {
       this.shootingMarble = null;
       this.gotMarble = false;
       this.gotExtraMove = false;
+      this.movesLeft --;
       this.waitUntilEndOfShot = 30;
       this.shootingPlatform.kill();
       this.getActiveInventory().splice(this.pickedMarbleIndex, 1);
@@ -336,7 +343,6 @@ export default class Table extends Thing {
         return;
       }
       this.setPhase('picking');
-      this.movesLeft --;
 
       if (this.movesLeft === 0 || this.getActiveInventory().length === 0) {
         this.activePlayer = this.activePlayer === 'p1' ? 'p2' : 'p1';
@@ -355,8 +361,10 @@ export default class Table extends Thing {
       }
       else {
         // Freeze all marbles that moved last turn
-        for (const thing of game.getThings().filter(x => x instanceof Marble)) {
-          thing.checkForFreeze();
+        if (!this.gotExtraMove) {
+          for (const thing of game.getThings().filter(x => x instanceof Marble)) {
+            thing.checkForFreeze();
+          }
         }
       }
     }
@@ -386,6 +394,10 @@ export default class Table extends Thing {
     for (const thing of game.getThings().filter(x => x instanceof Marble || x instanceof Structure)) {
       thing.isDead = true;
     }
+  }
+
+  invScale() {
+    return this.activePlayer === 'p1' ? 1 : -1;
   }
 
   draw () {
@@ -431,6 +443,7 @@ export default class Table extends Thing {
 
     // Inventory
     let xPos = 9.2;
+    
     let i = 0;
     for (const marbleType of this.getActiveInventory()) {
       let collectScale = 1.0;
@@ -441,18 +454,30 @@ export default class Table extends Thing {
       render.drawUIMesh({
         mesh: assets.meshes.sphere,
         texture: assets.textures['uv_marble_' + marbleType] ?? assets.textures.square,
-        position: [xPos, -10.4, -3.7 + (this.inventoryTrayPosition * 3) + ((this.inventoryTrayMarbleHeights[i] ?? 0) * 0.7)],
+        position: [xPos*this.invScale(), -10.4, -3.7 + (this.inventoryTrayPosition * 1.7) + ((this.inventoryTrayMarbleHeights[i] ?? 0) * 0.7)],
         scale: 2 * getMarbleScale(marbleType) * collectScale,
         rotation: [0, 0, 0],
         unshaded: getMarbleUnshaded(marbleType),
       })
+
+      if (['positioning', 'shooting'].includes(this.phase) && i === this.pickedMarbleIndex) {
+        render.drawUIMesh({
+          mesh: assets.meshes.pointer,
+          texture: assets.textures.square,
+          position: [xPos*this.invScale(), -10.4, -3.7 + (this.inventoryTrayPosition * 1.7)],
+          scale: 0.5,
+          rotation: [0, 0, this.time * 0.02],
+          color: this.activePlayer === 'p1' ? [0, 0, 1, 1] : [1, 0, 0, 1],
+          unshaded: false,
+        })
+      }
       xPos -= 1.6
       i ++;
     }
 
     // Who's turn?
     let textColor = this.activePlayer === 'p1' ? 'blue' : '#c24823';
-    if (this.phase !== 'shot' && this.phase !== 'victory') {
+    if (this.phase !== 'victory') {
       let turnText = ''
       if (this.isSingleplayer) {
         if (this.activePlayer !== 'p1') {
@@ -470,7 +495,7 @@ export default class Table extends Thing {
           turnText = 'Red Player\'s Turn';
         }
       }
-      turnText += ` - ${this.movesLeft} move${this.movesLeft === 1 ? '' : 's'} left`
+      turnText += ` - ${this.movesLeft} shot${this.movesLeft === 1 ? '' : 's'} left`
       drawText(
         turnText,
         80, textColor, [0, 104], [0, -1]
@@ -500,9 +525,9 @@ export default class Table extends Thing {
       let hintText = '';
       if (this.isSingleplayer) {
         victoryText = this.playerWin === 'p1' ? 'Level Complete!' : 'Defeat'
-        hintText = this.playerWin === 'p1' ? 'You captured your opponent\'s goal ball!' : 'Your opponent captured your goal ball!'
+        hintText = this.playerWin === 'p1' ? 'You captured all of your opponent\'s goal marbles!' : 'Your opponent captured all of your goal marbles!'
         if (this.playerWin !== this.activePlayer) {
-          hintText = this.playerWin === 'p1' ? 'Your opponent accidentally captured their own goal ball!' : 'You captured your own goal ball!'
+          hintText = this.playerWin === 'p1' ? 'Your opponent accidentally captured their own goal marble!' : 'You captured your own goal marble!'
         }
         if (this.winFromRunOut) {
           hintText = this.playerWin === 'p1' ? 'Your opponent ran out of marbles!' : 'You ran out of marbles!'
@@ -510,9 +535,9 @@ export default class Table extends Thing {
       }
       else {
         victoryText = this.playerWin === 'p1' ? 'Blue Wins!' : 'Red Wins!'
-        hintText = this.playerWin === 'p1' ? 'Blue captured Red\'s goal ball!' : 'Red captured Blue\'s goal ball!'
+        hintText = this.playerWin === 'p1' ? 'Blue captured all of Red\'s goal marbles!' : 'Red captured all of Blue\'s goal marbles!'
         if (this.playerWin !== this.activePlayer) {
-          hintText = this.playerWin === 'p1' ? 'Red accidentally captured their own goal ball!' : 'Blue accidentally captured their own goal ball!';
+          hintText = this.playerWin === 'p1' ? 'Red accidentally captured their own goal marble!' : 'Blue accidentally captured their own goal marble!';
         }
         if (this.winFromRunOut) {
           hintText = this.playerWin === 'p1' ? 'Red ran out of marbles!' : 'Blue ran out of marbles!'

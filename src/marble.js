@@ -38,7 +38,7 @@ export function getMarbleScale(type) {
 
 export function getMarbleDensity(type) {
   if (type.includes('goal')) {
-    return 1.1;
+    return 0.9;
   }
   if (type.includes('metal')) {
     return 20;
@@ -170,6 +170,7 @@ export default class Marble extends Thing {
 
   collect() {
     const table = game.getThing('table');
+    this.isDead = true;
 
     if (this.isShot) {
       soundmanager.playSound('bad', 1, 1);
@@ -180,11 +181,11 @@ export default class Marble extends Thing {
           soundmanager.playSound('extra_turn', 1, 1);
           table.movesLeft ++;
           table.gotExtraMove = true;
-          game.addThing(new Announcement('Extra Turn!'), 70);
+          game.addThing(new Announcement('Bonus Shot!'), 70, 3);
         }
         else {
           soundmanager.playSound('collect', 1, 1);
-          game.addThing(new Announcement('No more marbles - skipping extra turn'), 40);
+          game.addThing(new Announcement('No more marbles - skipping bonus shot'), 40, 3);
         }
       }
       else {
