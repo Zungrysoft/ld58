@@ -67,6 +67,7 @@
         "marbles": [
             { "type": "goal_p1", "position": [-5.1, 4.9, 0] },
             { "type": "goal_p1", "position": [-3.3, -3.3, 0] },
+            { "type": "goal_p1", "position": [-1.3, -3.3, 0] },
             { "type": "basic", "position": [-5.1, 3.9, 0] },
             { "type": "basic", "position": [-5.1, 2.9, 0] },
             { "type": "basic", "position": [-3.4, 7.7, 0] },
@@ -310,6 +311,523 @@
                     [-6.3, -12],
                     [-6.3, -6.2],
                     [-9, 0]
+                ]
+            }
+        ],
+        "theme": "mountains"
+    },
+    "level5": {
+        "title": "Attack and Defend",
+        "isSingleplayer": false,
+        "stageMesh": "table5",
+        "stageTexture": null,
+        "featureSymmetry": null,
+        "marbles": [
+            { "type": "goal_p1", "position": [-1.27, 8.4, 1.7] },
+            { "type": "mega", "position": [-6.7, 8.4, 1.7] },
+
+            { "type": "goal_p2", "position": [-6, -4, 0] },
+            { "type": "basic", "position": [-5, -4, 0] },
+            { "type": "basic", "position": [-7, -4, 0] },
+            { "type": "basic", "position": [-6, -3, 0] },
+            { "type": "basic", "position": [-6, -5, 0] },
+            { "type": "basic", "position": [-7, -5, 0] },
+            { "type": "basic", "position": [-5, -3, 0] },
+            { "type": "basic", "position": [-7, -3, 0] },
+            { "type": "basic", "position": [-5, -5, 0] },
+
+            { "type": "goal_p2", "position": [6, -2, 1.05] },
+            { "type": "basic", "position": [5, -2, 1.05] },
+            { "type": "basic", "position": [7, -2, 1.05] },
+            { "type": "basic", "position": [6, -3, 1.05] },
+            { "type": "basic", "position": [6, -1, 1.05] },
+
+            { "type": "goal_p2", "position": [0, 2, 1.05] },
+            { "type": "basic", "position": [1, 2, 1.05] },
+            { "type": "basic", "position": [-1, 2, 1.05] },
+            { "type": "basic", "position": [0, 3, 1.05] },
+            { "type": "basic", "position": [0, 1, 1.05] },
+
+            { "type": "goal_p2", "position": [-0.5, 6, 1.05] },
+            { "type": "basic", "position": [-1.5, 6, 1.05] },
+            { "type": "basic", "position": [0.5, 6, 1.05] },
+
+            { "type": "basic", "position": [7, -9, 0] },
+            { "type": "basic", "position": [6, -9, 0] },
+            { "type": "basic", "position": [5, -9, 0] },
+            { "type": "basic", "position": [4, -9, 0] },
+            { "type": "basic", "position": [3, -9, 0] },
+            { "type": "basic", "position": [2, -9, 0] },
+            
+            { "type": "structure_pillar", "position": [9.6, -8.85, 1.05] },
+            { "type": "structure_pillar", "position": [7, 1.7, 1.05] },
+            { "type": "shock", "position": [0.85, -4.77, 1.05] },
+            { "type": "shock", "position": [-0.56, 2.97, 1.05] },
+            { "type": "shock", "position": [0, -8.5, 0] },
+            { "type": "shock", "position": [3, -8.5, 0] },
+            { "type": "shock", "position": [-2.4, -0.4, 0] },
+            { "type": "shock", "position": [-6.84, 3.3, 0] }
+        ],
+        "marbleCollection": [
+            "plus_one",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "shock"
+        ],
+        "aiMarbleCollection": [
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic"
+        ],
+        "aiIntelligence": {
+            "simulations": 200,
+            "pick": 3
+        },
+        "cameraDistance": 18,
+        "shootCameraDistance": 3,
+        "cameraPosition": [0, 0, 0],
+        "cameraStartAngle": [8, 3],
+        "marbleCollectHeight": -3,
+        "shootZones": [
+            {
+                "height": 0.2,
+                "polygon": [
+                    [-9, 6],
+                    [-9, -10.5],
+                    [8, -10.5]
+                ]
+            },
+            {
+                "height": 1.25,
+                "polygon": [
+                    [11, -9],
+                    [11, 0.5],
+                    [8.5, 3.5]
+                ]
+            },
+            {
+                "height": 1.25,
+                "polygon": [
+                    [6, 6],
+                    [3.5, 8],
+                    [2.5, 8]
+                ]
+            },
+            {
+                "height": 1.9,
+                "playerRestriction": "p2",
+                "polygon": [
+                    [-9, 8.5],
+                    [-9, 8.501]
+                ]
+            }
+        ],
+        "theme": "mountains"
+    },
+    "level6": {
+        "title": "Pyramid and Bailey",
+        "isSingleplayer": false,
+        "stageMesh": "table6",
+        "stageTexture": null,
+        "featureSymmetry": "mirror",
+        "marbles": [
+            { "type": "bonus", "position": [4, 0, 1] },
+            { "type": "basic", "position": [3, 0, 1] },
+            { "type": "goal_p1", "position": [3, -0.8, 1] },
+            { "type": "basic", "position": [3, -1.6, 1] },
+
+            { "type": "basic", "position": [-1, 5.5, 0] },
+            { "type": "basic", "position": [-2, 5.5, 0] },
+            { "type": "basic", "position": [-3, 5.5, 0] },
+            { "type": "goal_p1", "position": [0, 5.5, 0] },
+            { "type": "basic", "position": [1, 5.5, 0] },
+            { "type": "basic", "position": [2, 5.5, 0] },
+            { "type": "basic", "position": [3, 5.5, 0] },
+            
+            { "type": "basic", "position": [3.5, 4.7, 0] },
+            { "type": "bonus", "position": [0, 4.7, 0] },
+            { "type": "basic", "position": [-3.5, 4.7, 0] },
+
+            { "type": "fire", "position": [-4.4, 3.2, 0] },
+            { "type": "fire", "position": [-7, 0, 0] },
+            { "type": "fire", "position": [7.7, 0, 0] },
+            { "type": "bonus", "position": [-2.8, 0, 0] },
+
+            { "type": "basic", "position": [-7.8, 0, 0] },
+            { "type": "basic", "position": [-7.8, 1, 0] },
+            { "type": "basic", "position": [-7.8, 3, 0] },
+            { "type": "basic", "position": [-7.8, 4, 0] },
+            { "type": "basic", "position": [-7.8, 5, 0] },
+            { "type": "basic", "position": [-7.8, 6, 0] },
+
+            { "type": "basic", "position": [-8.6, 2, 0] },
+            { "type": "basic", "position": [-7, 2, 0] },
+            { "type": "goal_p2", "position": [-7.8, 2, 0] }
+            
+        ],
+        "marbleCollection": [
+            "plus_one",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic"
+        ],
+        "aiMarbleCollection": [
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic"
+        ],
+        "aiIntelligence": {
+            "simulations": 200,
+            "pick": 3
+        },
+        "cameraDistance": 16,
+        "shootCameraDistance": 4,
+        "cameraPosition": [0, 0, 0],
+        "cameraStartAngle": [8, 3],
+        "marbleCollectHeight": -3,
+        "shootZones": [
+            {
+                "height": 0.2,
+                "polygon": [
+                    [-10.9, 0],
+                    [-10.9, 8.6],
+                    [9.2, 8.6],
+                    [9.2, 0]
+                ]
+            }
+        ],
+        "theme": "mountains"
+    },
+    "level7": {
+        "title": "Ultimatum",
+        "isSingleplayer": false,
+        "stageMesh": "table7",
+        "stageTexture": null,
+        "featureSymmetry": "rotate",
+        "marbles": [
+            { "type": "bonus", "position": [0, 0, 0] },
+            { "type": "basic", "position": [0, 1, 0] },
+            { "type": "goal_p2", "position": [0, 2, 0] },
+            { "type": "basic", "position": [0, 3, 0] },
+            { "type": "bonus", "position": [0, 4, 0] },
+            { "type": "basic", "position": [0, 5, 0] },
+            { "type": "goal_p1", "position": [0, 6, 0] },
+
+            { "type": "basic", "position": [-1, 0, 0] },
+            { "type": "goal_p1", "position": [-2, 0, 0] },
+            { "type": "basic", "position": [-3, 0, 0] },
+            { "type": "basic", "position": [-4, 0, 0] },
+
+            { "type": "basic", "position": [-3.5, 1, 0] },
+            { "type": "basic", "position": [-3, 2, 0] },
+            { "type": "basic", "position": [-2.5, 3, 0] },
+            { "type": "basic", "position": [-2, 4, 0] },
+            { "type": "basic", "position": [-1.5, 5, 0] },
+            { "type": "basic", "position": [-1, 6, 0] },
+            { "type": "basic", "position": [-0.5, 7, 0] },
+
+            { "type": "basic", "position": [3.5, 1, 0] },
+            { "type": "basic", "position": [3, 2, 0] },
+            { "type": "basic", "position": [2.5, 3, 0] },
+            { "type": "basic", "position": [2, 4, 0] },
+            { "type": "basic", "position": [1.5, 5, 0] },
+            { "type": "basic", "position": [1, 6, 0] },
+            { "type": "basic", "position": [0.5, 7, 0] },
+
+            { "type": "basic", "position": [0, 8, 0] },
+
+
+
+            { "type": "metal", "position": [-4, 7, 0] }
+
+            
+            
+        ],
+        "marbleCollection": [
+            "plus_one",
+            "basic",
+            "basic",
+            "basic",
+            "shock",
+            "shock",
+            "fire",
+            "fire",
+            "structure_ramp",
+            "structure_pillar"
+        ],
+        "aiMarbleCollection": [
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic"
+        ],
+        "aiIntelligence": {
+            "simulations": 200,
+            "pick": 3
+        },
+        "cameraDistance": 13,
+        "shootCameraDistance": 4,
+        "cameraPosition": [0, 0, 0],
+        "cameraStartAngle": [8, 3],
+        "marbleCollectHeight": -3,
+        "shootZones": [
+            {
+                "height": 0.2,
+                "polygon": [
+                    [7, 0],
+                    [7, -10],
+                    [-7, -10],
+                    [-7, 0]
+                ]
+            }
+        ],
+        "theme": "mountains"
+    },
+    "level8": {
+        "title": "Castle Gates",
+        "isSingleplayer": false,
+        "stageMesh": "table8",
+        "stageTexture": null,
+        "featureSymmetry": "rotate",
+        "marbles": [
+            
+            { "type": "bonus", "position": [3, 2, 0] },
+            { "type": "shock", "position": [2, 3, 0] },
+            { "type": "bonus", "position": [2, -2, 0] },
+            { "type": "fire", "position": [3, -2, 0] },
+
+            { "type": "goal_p1", "position": [1, 0, 0] },
+            { "type": "goal_p1", "position": [0, 1, 0] },
+
+            
+            { "type": "basic", "position": [-4, 0, 0] },
+            { "type": "basic", "position": [-3, -1, 0] },
+            { "type": "basic", "position": [-2, -2, 0] },
+            { "type": "basic", "position": [-1, -3, 0] },
+            { "type": "basic", "position": [0, -4, 0] },
+
+            
+            { "type": "bonus", "position": [0, 0, 0] }
+        ],
+        "marbleCollection": [
+            "plus_one",
+            "basic",
+            "basic",
+            "fire",
+            "fire"
+        ],
+        "aiMarbleCollection": [
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic"
+        ],
+        "aiIntelligence": {
+            "simulations": 200,
+            "pick": 3
+        },
+        "cameraDistance": 11,
+        "shootCameraDistance": 2,
+        "cameraPosition": [0, 0, 0],
+        "cameraStartAngle": [8, 3],
+        "marbleCollectHeight": -5,
+        "shootZones": [
+            {
+                "height": 0.2,
+                "polygon": [
+                    [7.101, 0],
+                    [7.1, 0]
+                ]
+            },
+            {
+                "height": 0.2,
+                "polygon": [
+                    [0, 7.101],
+                    [0, 7.1]
+                ]
+            }
+        ],
+        "theme": "mountains"
+    },
+    "level9": {
+        "title": "Overlook Crossing",
+        "isSingleplayer": false,
+        "stageMesh": "table9",
+        "stageTexture": null,
+        "featureSymmetry": "mirror",
+        "marbles": [
+            
+            { "type": "goal_p1", "position": [-2.5, 0.6, 0.69] },
+            { "type": "basic", "position": [-3.5, 0, 0.69] },
+            { "type": "basic", "position": [-4.5, 0, 0.69] },
+            { "type": "basic", "position": [-1.5, 0, 0.69] },
+
+
+            { "type": "basic", "position": [1.8, 1, 0.69] },
+            { "type": "basic", "position": [1.8, 0, 0.69] },
+            { "type": "basic", "position": [2.8, 1, 0.69] },
+            { "type": "basic", "position": [2.8, 0, 0.69] },
+            { "type": "basic", "position": [3.8, 1, 0.69] },
+            { "type": "basic", "position": [3.8, 0, 0.69] },
+
+
+            { "type": "basic", "position": [4, -9, 0] },
+            { "type": "basic", "position": [3, -9, 0] },
+            { "type": "basic", "position": [2, -9, 0] },
+            { "type": "basic", "position": [0, -9, 0] },
+            { "type": "basic", "position": [-1, -9, 0] },
+            { "type": "basic", "position": [-2, -9, 0] },
+
+
+            { "type": "goal_p2", "position": [2.3, -7.4, 0] },
+
+            { "type": "shock", "position": [-1.5, -3.7, 0] },
+            { "type": "shock", "position": [-4, -3.7, 0] },
+
+            
+            { "type": "bonus", "position": [0, 0, 1] }
+        ],
+        "marbleCollection": [
+            "plus_one",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic"
+        ],
+        "aiMarbleCollection": [
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic"
+        ],
+        "aiIntelligence": {
+            "simulations": 200,
+            "pick": 3
+        },
+        "cameraDistance": 15,
+        "shootCameraDistance": 4,
+        "cameraPosition": [0, 0, 0],
+        "cameraStartAngle": [8, 3],
+        "marbleCollectHeight": -3,
+        "shootZones": [
+            {
+                "height": 1.2,
+                "polygon": [
+                    [-6.6, 0.8],
+                    [-6.6, 0]
+                ]
+            },
+            {
+                "height": 1.2,
+                "polygon": [
+                    [5.6, 1.0],
+                    [5.6, 0]
+                ]
+            },
+            {
+                "height": 0.2,
+                "polygon": [
+                    [4.2, 10.4],
+                    [-2.8, 10.4],
+                    [-5.8, 6.4]
+                ]
+            }
+        ],
+        "theme": "mountains"
+    },
+    "level10": {
+        "title": "Under Construction",
+        "isSingleplayer": false,
+        "stageMesh": "table10",
+        "stageTexture": null,
+        "featureSymmetry": "rotate",
+        "marbles": [
+            { "type": "basic", "position": [-5.0, -5.0, 0] },
+            { "type": "structure_pillar", "position": [-3.0, -5.0, 0] },
+            { "type": "basic", "position": [-1.0, -5.0, 0] },
+            { "type": "basic", "position": [ 1.0, -5.0, 0] },
+            { "type": "structure_pillar", "position": [ 3.0, -5.0, 0] },
+            { "type": "basic", "position": [ 5.0, -5.0, 0] },
+
+            { "type": "basic", "position": [-5.0, -3.0, 0] },
+            { "type": "basic", "position": [-3.0, -3.0, 0] },
+            { "type": "goal_p1", "position": [-1.0, -3.0, 0] },
+            { "type": "basic", "position": [ 1.0, -3.0, 0] },
+            { "type": "basic", "position": [ 3.0, -3.0, 0] },
+            { "type": "structure_pillar", "position": [ 5.0, -3.0, 0] },
+
+            { "type": "basic", "position": [-5.0, -1.0, 0] },
+            { "type": "structure_ramp", "position": [-3.0, -1.0, 0] },
+            { "type": "basic", "position": [-1.0, -1.0, 0] },
+            { "type": "goal_p1", "position": [ 1.0, -1.0, 0] },
+            { "type": "basic", "position": [ 3.0, -1.0, 0] },
+            { "type": "basic", "position": [ 5.0, -1.0, 0] }
+            
+        ],
+        "marbleCollection": [
+            "plus_one",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "shock",
+            "structure_pillar"
+        ],
+        "aiMarbleCollection": [
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic",
+            "basic"
+        ],
+        "aiIntelligence": {
+            "simulations": 200,
+            "pick": 3
+        },
+        "cameraDistance": 11,
+        "shootCameraDistance": 2,
+        "cameraPosition": [0, 0, 0],
+        "cameraStartAngle": [8, 3],
+        "marbleCollectHeight": -3,
+        "shootZones": [
+            {
+                "height": 0.2,
+                "polygon": [
+                    [-7, 0],
+                    [-7, 7],
+                    [7, 7],
+                    [7, 0]
                 ]
             }
         ],

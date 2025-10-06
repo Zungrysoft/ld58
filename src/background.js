@@ -24,7 +24,7 @@ export default class Background extends Thing {
   viewAngle = MENU_VIEW_ANGLE;
   viewAngleTarget = MENU_VIEW_ANGLE;
 
-  zoomedCamera = false;
+  zoomedCamera = true;
 
   constructor() {
     super()
@@ -80,7 +80,8 @@ export default class Background extends Thing {
   }
 
   isShootingCamera() {
-    return this.zoomedCamera && ['shooting', 'shot'].includes(game.getThing('table')?.phase);
+    const table = game.getThing('table')
+    return this.zoomedCamera && ['shooting', 'shot'].includes(table?.phase) && !table.noZoom;
   }
 
   updateCamera() {

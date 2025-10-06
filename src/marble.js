@@ -171,6 +171,7 @@ export default class Marble extends Thing {
         const impulse = vec3.scale(impulseDirection, impulseForce);
 
         ph.applyImpulse(marble, impulse);
+        marble.shouldBeFrozen = true;
       }
     }
 

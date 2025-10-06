@@ -10,6 +10,7 @@ import { assets } from 'game'
 
 export default class Structure extends Thing {
   time = 0
+  turnsAlive = 0
 
   constructor (mesh, texture, position, angle) {
     super()
@@ -18,6 +19,7 @@ export default class Structure extends Thing {
     this.texture = texture;
     this.position = [...(position ?? [0, 0, 0])];
     this.angle = angle ?? 0;
+    this.scale = 1.0
 
     const meshData = game.assets.meshes[this.mesh];
     this.meshTriangles = []
@@ -29,7 +31,23 @@ export default class Structure extends Thing {
   update () {
     // super.update()
 
+    if (this.isShrinking) {
+      this.scale -= 0.1
+      if (this.scale <= 0) {
+        this.isDead = true;
+      }
+    }
+    
+
     this.time ++
+  }
+
+  shrink() {
+    const ph = game.getThing('table').physicsHandler;
+    if (ph) {
+      ph.removeStructure(this);
+    }
+    this.isShrinking = true;
   }
 
   kill() {
@@ -71,6 +89,7 @@ export default class Structure extends Thing {
       texture: rTexture,
       position: rPos,
       rotation: rRot,
+      scale: rScale,
       color: rColor,
     })
   }

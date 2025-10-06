@@ -66,11 +66,12 @@ export default class TitleMenu extends Menu {
       if (Math.random() < 0.1) {marbleType = 'basic'}
       if (Math.random() < 0.03) {marbleType = 'heavy'}
       if (Math.random() < 0.001) {marbleType = 'mega'}
-      if (Math.random() < 0.08) {marbleType = 'structure_ramp'}
+      if (Math.random() < 0.04) {marbleType = 'structure_ramp'}
+      if (Math.random() < 0.04) {marbleType = 'structure_pillar'}
       if (Math.random() < 0.08) {marbleType = 'fire'}
       if (Math.random() < 0.05) {marbleType = 'metal'}
       if (Math.random() < 0.1) {marbleType = 'shock'}
-      if (Math.random() < 0.16) {marbleType = 'bonus'}
+      if (Math.random() < 0.04) {marbleType = 'bonus'}
 
       game.addThing(new CollectedMarble(marbleType, 'victory'));
     }

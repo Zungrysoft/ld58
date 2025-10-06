@@ -14,6 +14,7 @@ import Table from './table.js'
 export default class StageSelectMenu extends Menu {
   buttons = []
   header = ''
+  buttonColumns = 2
 
   constructor(isMultiplayer) {
     super()

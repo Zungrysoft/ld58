@@ -44,6 +44,7 @@ export default class Table extends Thing {
   playerWin = null
   winFromRunOut = false
   movesLeft = 2
+  noZoom = false
 
   constructor (levelData) {
     super()
@@ -263,7 +264,7 @@ export default class Table extends Thing {
 
   updatePicking() {
     const selectedMarble = this.getSelectedMarble();
-    if (game.mouse.leftClick && selectedMarble < this.getActiveInventory().length && selectedMarble >= 0) {
+    if (game.mouse.leftClick && selectedMarble < this.getActiveInventory().length && selectedMarble >= 0 && this.phaseTime > 5) {
       if (this.getActiveInventory()[selectedMarble] === 'plus_one') {
         this.setPhase('picking');
         this.addMarble('basic');
@@ -271,6 +272,7 @@ export default class Table extends Thing {
         this.movesLeft --;
         if (this.movesLeft === 0) {
           this.waitUntilEndOfShot = 20;
+          this.noZoom = true
           this.setPhase('shot')
         }
       }
@@ -295,6 +297,10 @@ export default class Table extends Thing {
     let potentialPathPoints = [];
     let potentialPathDistances = [];
     for (const shootZone of this.shootZones) {
+      if (shootZone.playerRestriction && shootZone.playerRestriction !== this.activePlayer) {
+        continue;
+      }
+
       const pointOnPlane = vec3.pointAtZ(cameraPos, cameraRay, shootZone.height);
 
       const pathPoint = vec2.closestPointOnPath(shootZone.polygon, pointOnPlane, 3);
@@ -321,6 +327,7 @@ export default class Table extends Thing {
       this.setPhase('shooting');
       this.readyToShoot = false; // Wait until player releases LMB before starting shot
       this.shootPower = 0;
+      this.noZoom = false
       game.getThing('background').viewPositionTargetShooting = this.selectedShootPosition;
       soundmanager.playSound('place', 0.8, 1);
 
@@ -377,7 +384,6 @@ export default class Table extends Thing {
       this.gotExtraMove = false;
       this.movesLeft --;
       this.waitUntilEndOfShot = 30;
-      this.shootingPlatform.kill();
       this.getActiveInventory().splice(this.pickedMarbleIndex, 1);
     }
   }
@@ -400,6 +406,10 @@ export default class Table extends Thing {
   }
 
   updateShot() {
+    if (this.shootingPlatform && !this.shootingPlatform.isDead && this.phaseTime === 30) {
+      this.shootingPlatform.shrink();
+    }
+
     if (this.allMarblesStopped()) {
       this.waitUntilEndOfShot --;
       this.physicsHandler.stopAllMarbles(); // Make sure they're really stopped
@@ -422,6 +432,13 @@ export default class Table extends Thing {
         }
         this.movesLeft = 2;
         this.deQueueMarbles();
+
+        for (const thing of game.getThings().filter(x => x instanceof Structure)) {
+          thing.turnsAlive ++;
+          if (thing.turnsAlive >= 10 * 2) {
+            thing.shrink();
+          }
+        }
         
         // Unfreeze all marbles
         for (const thing of game.getThings().filter(x => x instanceof Marble)) {

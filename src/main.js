@@ -36,6 +36,12 @@ await game.loadAssets({
     table2: 'models/table2.obj',
     table3: 'models/table3.obj',
     table4: 'models/table4.obj',
+    table5: 'models/table5.obj',
+    table6: 'models/table6.obj',
+    table7: 'models/table7.obj',
+    table8: 'models/table8.obj',
+    table9: 'models/table9.obj',
+    table10: 'models/table10.obj',
 
     cube: 'models/cube.obj',
     sphere: 'models/sphere.obj',
