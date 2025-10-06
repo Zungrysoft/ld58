@@ -55,7 +55,7 @@ await game.loadAssets({
     ramp: 'models/ramp.obj',
     pillar: 'models/pillar.obj',
     pointer: 'models/pointer.obj',
-    plus_one: 'models/plus_one.obj',
+    plus_one: 'models/skip.obj',
 
     deco_mountains: 'models/deco_mountains.obj',
     deco_sand: 'models/deco_sand.obj',
