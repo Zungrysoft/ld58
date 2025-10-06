@@ -197,12 +197,13 @@ export default class MarblePhysicsHandler {
           otherObj.shouldBeFrozen = true;
         }
 
-        if (selfObj.isOnFire()) {
-          otherObj.burnUp();
-        }
-
-        if (selfObj.type === 'shock' && selfObj.isShot) {
-          selfObj.sendShockWave();
+        if (selfObj.isSpeedy()) {
+          if (selfObj.isOnFire()) {
+            otherObj.burnUp();
+          }
+          if (selfObj.type === 'shock') {
+            selfObj.sendShockWave();
+          }
         }
       }
     });

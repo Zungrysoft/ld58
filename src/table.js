@@ -15,6 +15,7 @@ import CollectedMarble from './collectedmarble.js'
 import drawText from './text.js'
 import StageSelectMenu from './menustage.js'
 import Announcement from './announcement.js'
+import QuitButton from './quitbutton.js'
 
 const SHOOT_TIME = 55;
 const MAX_SHOOT_POWER = 25;
@@ -53,17 +54,47 @@ export default class Table extends Thing {
     this.mesh = levelData.stageMesh;
     this.texture = levelData.stageTexture;
     this.theme = levelData.theme;
-    this.shootZones = levelData.shootZones;
     this.marbleCollectHeight = levelData.marbleCollectHeight;
     this.inventoryP1 = [...levelData.marbleCollection];
     this.inventoryP2 = this.isSingleplayer ? [...levelData.aiMarbleCollection] : [...levelData.marbleCollection];
 
+    this.shootZones = levelData.shootZones;
+    if (levelData.featureSymmetry) {
+      const pShootZones = [...this.shootZones];
+
+      for (const ps of pShootZones) {
+        const newShootZone = {
+          height: ps.height,
+          polygon: [],
+        }
+
+        for (const pt of ps.polygon) {
+          if (levelData.featureSymmetry === 'mirror') {
+            newShootZone.polygon.push([
+              pt[0],
+              -pt[1],
+            ])
+          }
+          else {
+            newShootZone.polygon.push([
+              -pt[0],
+              -pt[1],
+            ])
+          }
+        }
+
+        this.shootZones.push(newShootZone);
+      }
+    }
+
+    game.addThing(new QuitButton())
+
     for (const marble of levelData.marbles) {
       game.addThing(new Marble(marble.type, [...marble.position]));
-      if (levelData.marbleSymmetry) {
+      if (levelData.featureSymmetry) {
         let mirrorPosition;
 
-        if (levelData.marbleSymmetry === 'rotate') {
+        if (levelData.featureSymmetry === 'rotate') {
           if (marble.position[0] === 0 && marble.position[1] === 0) {
             continue;
           }
@@ -74,7 +105,7 @@ export default class Table extends Thing {
             marble.position[2],
           ];
         }
-        else if (levelData.marbleSymmetry === 'mirror') {
+        else if (levelData.featureSymmetry === 'mirror') {
           if (marble.position[1] === 0) {
             continue;
           }
@@ -383,15 +414,20 @@ export default class Table extends Thing {
     }
 
     if (this.phaseTime > 60*3 && game.mouse.leftClick) {
-      game.addThing(new StageSelectMenu(!this.isSingleplayer))
-      soundmanager.playSound('menu', 1, 1);
-      this.cleanUp()
+      
+      this.quit()
     }
+  }
+
+  quit() {
+    game.addThing(new StageSelectMenu(!this.isSingleplayer))
+    soundmanager.playSound('menu', 1, 1);
+    this.cleanUp();
   }
 
   cleanUp() {
     this.isDead = true
-    for (const thing of game.getThings().filter(x => x instanceof Marble || x instanceof Structure)) {
+    for (const thing of game.getThings().filter(x => x instanceof Marble || x instanceof Structure || x instanceof QuitButton)) {
       thing.isDead = true;
     }
   }
@@ -435,7 +471,7 @@ export default class Table extends Thing {
           texture: assets.textures[this.texture] ?? assets.textures.square,
           position: pos,
           scale: 0.09,
-          color: powerForce >= d ? [0.9, 0, 0, 1] : [0.9, 0.8, 0, 1],
+          color: powerForce >= d ? [0.7, 0, 0, 1] : [0.9, 0.8, 0, 1],
           rotation: [0, 0, angle],
         })
       }
@@ -505,7 +541,7 @@ export default class Table extends Thing {
     // Phase hint
     let phaseText = '';
     if (this.phase === 'picking') {
-      phaseText = 'Select your marble';
+      phaseText = 'Select a marble from your collection';
     }
     if (this.phase === 'positioning') {
       phaseText = 'Choose an edge point';

@@ -126,7 +126,11 @@ export default class Marble extends Thing {
   }
 
   isOnFire() {
-    return this.type === 'fire' && vec3.magnitude(this.velocity) > FIRE_MARBLE_SPEED_THRESHOLD;
+    return this.type === 'fire' && this.isSpeedy();
+  }
+
+  isSpeedy() {
+    return vec3.magnitude(this.velocity) > FIRE_MARBLE_SPEED_THRESHOLD;
   }
 
   burnUp() {
@@ -212,9 +216,9 @@ export default class Marble extends Thing {
   }
 
   unfreeze() {
+    this.shouldBeFrozen = false;
     if (this.isFrozen) {
       this.isFrozen = false;
-      this.shouldBeFrozen = false;
       game.getThing('table').physicsHandler.unfreezeMarble(this);
     }
   }
