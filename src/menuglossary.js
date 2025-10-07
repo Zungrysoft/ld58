@@ -35,6 +35,13 @@ export default class GlossaryMenu extends Menu {
       ]
     },
     {
+      type: 'shooter_p1',
+      title: 'Shooter Marble',
+      description: [
+        'Returns to your collection at the end of turn to be used again.',
+      ]
+    },
+    {
       type: 'shock',
       title: 'Shockwave Marble',
       description: [
@@ -57,7 +64,7 @@ export default class GlossaryMenu extends Menu {
         'After you shoot this, it transforms in to a ramp once it stops moving.',
         'The ramp faces in the the direction the marble was traveling in.',
         '',
-        'Disappears after 10 turns.',
+        'Disappears after 5 turns.',
       ]
     },
     {
@@ -66,7 +73,7 @@ export default class GlossaryMenu extends Menu {
       description: [
         'After you shoot this, it transforms in to a pillar once it stops moving.',
         '',
-        'Disappears after 10 turns.',
+        'Disappears after 5 turns.',
       ]
     },
     {

@@ -22,6 +22,8 @@ await game.loadAssets({
 
     uv_marble_goal_p1: 'images/uv_marble_goal_p1.png',
     uv_marble_goal_p2: 'images/uv_marble_goal_p2.png',
+    uv_marble_shooter_p1: 'images/uv_marble_shooter_p1.png',
+    uv_marble_shooter_p2: 'images/uv_marble_shooter_p2.png',
     uv_marble_bonus: 'images/uv_marble_bonus.png',
     uv_marble_structure_ramp: 'images/uv_marble_structure_ramp.png',
     uv_marble_structure_pillar: 'images/uv_marble_structure_pillar.png',

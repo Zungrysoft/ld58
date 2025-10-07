@@ -154,6 +154,8 @@ export default class Table extends Thing {
     for (const thing of game.getThings().filter(x => x instanceof Marble)) {
       this.physicsHandler.addMarble(thing)
     }
+
+    this.deQueueMarbles();
   }
 
   update () {
@@ -259,6 +261,14 @@ export default class Table extends Thing {
   }
 
   deQueueMarbles() {
+    // Return the shooter marble to the player's inventory
+    if (!(this.isSingleplayer && this.activePlayer === 'p2')) {
+      const shooterIndex = this.getActiveInventory().findIndex(x => x.includes('shooter'));
+      if (shooterIndex === -1) {
+        this.getActiveInventoryQueue().push('shooter_' + (this.activePlayer === 'p1' ? 'p1' : 'p2'));
+      }
+    }
+
     while(this.getActiveInventoryQueue().length > 0) {
       this.getActiveInventory().push(this.getActiveInventoryQueue()[0]);
       this.getActiveInventoryQueue().splice(0, 1);
@@ -272,7 +282,8 @@ export default class Table extends Thing {
       this.getActiveInventory().splice(ind, 1);
     }
     while (this.getActiveInventory().length > MAX_INVENTORY_SIZE) {
-      this.getActiveInventory().splice(1, 1).findIndex(x => x !== 'plus_one');
+      const ind = this.getActiveInventory().findIndex(x => !x.includes('shooter'));
+      this.getActiveInventory().splice(ind, 1)
     }
   }
 
@@ -460,9 +471,13 @@ export default class Table extends Thing {
 
         for (const thing of game.getThings().filter(x => x instanceof Structure)) {
           thing.turnsAlive ++;
-          if (thing.turnsAlive >= 10 * 2) {
+          if (thing.turnsAlive >= 5 * 2) {
             thing.shrink();
           }
+        }
+
+        for (const thing of game.getThings().filter(x => x instanceof Marble && x.type.includes('shooter'))) {
+          thing.shrink();
         }
         
         // Unfreeze all marbles

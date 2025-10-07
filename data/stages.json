@@ -19,22 +19,14 @@
             { "type": "shock", "position": [-4.9, 5.1, 0] }
         ],
         "marbleCollection": [
-            "plus_one",
-            "basic",
-            "basic",
-            "basic",
             "basic",
             "basic"
         ],
         "aiMarbleCollection": [
-            "basic",
-            "basic",
+            "shooter_p2",
+            "shooter_p2",
             "shock"
         ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
         "cameraDistance": 11,
         "shootCameraDistance": 2,
         "cameraPosition": [0, 0, 0],
@@ -80,21 +72,9 @@
             { "type": "structure_pillar", "position": [3.9, -7, 0] }
         ],
         "marbleCollection": [
-            "plus_one",
-            "basic",
             "basic"
         ],
-        "aiMarbleCollection": [
-            "basic",
-            "basic",
-            "fire",
-            "fire",
-            "shock"
-        ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
+        "aiMarbleCollection": [],
         "cameraDistance": 15,
         "shootCameraDistance": 3,
         "cameraPosition": [0, 0, 0],
@@ -162,27 +142,11 @@
             { "type": "metal", "position": [0, 0, 0.8] }
         ],
         "marbleCollection": [
-            "plus_one",
-            "basic",
-            "basic",
             "basic",
             "basic",
             "basic"
         ],
-        "aiMarbleCollection": [
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic"
-        ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
+        "aiMarbleCollection": [],
         "cameraDistance": 15,
         "shootCameraDistance": 3,
         "cameraPosition": [0, 0, 0],
@@ -264,25 +228,13 @@
             { "type": "fire", "position": [4, 1, -0.7] }
         ],
         "marbleCollection": [
-            "plus_one",
-            "basic",
-            "basic",
-            "basic"
-        ],
-        "aiMarbleCollection": [
-            "basic",
-            "basic",
-            "basic",
             "basic",
             "basic",
             "basic",
             "basic",
             "basic"
         ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
+        "aiMarbleCollection": [],
         "cameraDistance": 15,
         "shootCameraDistance": 3,
         "cameraPosition": [0, 0, 0],
@@ -362,28 +314,13 @@
             { "type": "shock", "position": [-6.84, 3.3, 0] }
         ],
         "marbleCollection": [
-            "plus_one",
             "basic",
             "basic",
             "basic",
             "basic",
-            "shock",
             "shock"
         ],
-        "aiMarbleCollection": [
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic"
-        ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
+        "aiMarbleCollection": [],
         "cameraDistance": 18,
         "shootCameraDistance": 3,
         "cameraPosition": [0, 0, 0],
@@ -467,27 +404,11 @@
             
         ],
         "marbleCollection": [
-            "plus_one",
-            "basic",
-            "basic",
             "basic",
             "basic",
             "basic"
         ],
-        "aiMarbleCollection": [
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic"
-        ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
+        "aiMarbleCollection": [],
         "cameraDistance": 16,
         "shootCameraDistance": 4,
         "cameraPosition": [0, 0, 0],
@@ -554,10 +475,6 @@
             
         ],
         "marbleCollection": [
-            "plus_one",
-            "basic",
-            "basic",
-            "basic",
             "shock",
             "shock",
             "fire",
@@ -574,10 +491,6 @@
             "shock",
             "shock"
         ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
         "cameraDistance": 13,
         "shootCameraDistance": 4,
         "cameraPosition": [0, 0, 0],
@@ -625,21 +538,11 @@
             { "type": "bonus", "position": [0, 0, 0] }
         ],
         "marbleCollection": [
-            "plus_one",
-            "basic",
             "basic",
             "fire",
             "fire"
         ],
-        "aiMarbleCollection": [
-            "fire",
-            "fire",
-            "fire"
-        ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
+        "aiMarbleCollection": [],
         "cameraDistance": 11,
         "shootCameraDistance": 2,
         "cameraPosition": [0, 0, 0],
@@ -709,27 +612,11 @@
             { "type": "bonus", "position": [0, 0, 1] }
         ],
         "marbleCollection": [
-            "plus_one",
-            "basic",
-            "basic",
             "basic",
             "basic",
             "basic"
         ],
-        "aiMarbleCollection": [
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic"
-        ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
+        "aiMarbleCollection": [],
         "cameraDistance": 15,
         "shootCameraDistance": 4,
         "cameraPosition": [0, 0, 0],
@@ -793,27 +680,10 @@
             
         ],
         "marbleCollection": [
-            "plus_one",
-            "basic",
-            "basic",
-            "basic",
             "shock",
             "structure_pillar"
         ],
-        "aiMarbleCollection": [
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic",
-            "basic"
-        ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
+        "aiMarbleCollection": [],
         "cameraDistance": 11,
         "shootCameraDistance": 2,
         "cameraPosition": [0, 0, 0],
@@ -839,8 +709,6 @@
         "stageTexture": null,
         "featureSymmetry": "rotate",
         "marbles": [
-            
-
             { "type": "goal_p1", "position": [2.0, 2, 0] },
             { "type": "goal_p1", "position": [0, 4.0, 0] },
 
@@ -870,8 +738,6 @@
             { "type": "bonus", "position": [0, 0, 0] }
         ],
         "marbleCollection": [
-            "plus_one",
-            "basic",
             "basic",
             "basic"
         ],
@@ -882,10 +748,6 @@
             "fire",
             "shock"
         ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
         "cameraDistance": 11,
         "shootCameraDistance": 2,
         "cameraPosition": [0, 0, 0],
@@ -942,7 +804,6 @@
             { "type": "fire", "position": [0, 0, 0] }
         ],
         "marbleCollection": [
-            "plus_one",
             "basic",
             "basic",
             "basic"
@@ -953,10 +814,6 @@
             "fire",
             "shock"
         ],
-        "aiIntelligence": {
-            "simulations": 200,
-            "pick": 3
-        },
         "cameraDistance": 10,
         "shootCameraDistance": 2,
         "cameraPosition": [0, 0, 0],

@@ -57,6 +57,7 @@ export function getMarbleUnshaded(type) {
 export default class Marble extends Thing {
   time = 0
   tableTouchTime = 999999
+  shrinkScale = 1
 
   constructor (type, position, isShot) {
     super()
@@ -138,6 +139,13 @@ export default class Marble extends Thing {
     if (this.isMarkedForDeath) {
       this.kill();
     }
+
+    if (this.isShrinking) {
+      this.shrinkScale -= 0.1
+      if (this.shrinkScale <= 0) {
+        this.isDead = true;
+      }
+    }
   }
 
   isOnFire() {
@@ -206,7 +214,7 @@ export default class Marble extends Thing {
     const table = game.getThing('table');
     this.isDead = true;
 
-    if (this.isShot) {
+    if (this.type.includes('shooter')) {
       soundmanager.playSound('bad', 1, 1);
     }
     else if (this.type === 'evil') {
@@ -218,16 +226,20 @@ export default class Marble extends Thing {
       table.addMarble('evil');
     }
     else {
+      
+      if (this.type === 'bonus' && !table.gotExtraMove && !this.isShot) {
+        soundmanager.playSound('extra_turn', 1, 1);
+        table.movesLeft ++;
+        table.gotExtraMove = true;
+        game.addThing(new Announcement('Bonus Shot!'), 70, 2);
+        table.addMarble('bonus', true);
+      }
+      else {
+        table.addMarble(this.type);
+      }
+
       if (!table.isInventoryForfeit) {
-        if (this.type === 'bonus' && !table.gotExtraMove) {
-          soundmanager.playSound('extra_turn', 1, 1);
-          table.movesLeft ++;
-          table.gotExtraMove = true;
-          game.addThing(new Announcement('Bonus Shot!'), 70, 3);
-        }
-        else {
-          soundmanager.playSound('collect', 1, 1);
-        }
+        soundmanager.playSound('collect', 1, 1);
       }
       
 
@@ -239,11 +251,19 @@ export default class Marble extends Thing {
         game.addThing(new CollectParticle(this.position, this.type))
       }
 
-      table.addMarble(this.type);
+      
     }
     
 
     this.kill();
+  }
+
+  shrink() {
+    const ph = game.getThing('table').physicsHandler;
+    if (ph) {
+      ph.removeStructure(this);
+    }
+    this.isShrinking = true;
   }
 
   kill() {
@@ -292,6 +312,7 @@ export default class Marble extends Thing {
 
     // Scale
     let rScale = this.scale ?? 1;
+    rScale *= this.shrinkScale;
 
     // Color
     let rColor = [1, 1, 1, 1];
