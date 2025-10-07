@@ -100,14 +100,18 @@ export default class Marble extends Thing {
       this.collect();
     }
 
+    if (vec3.magnitude(this.velocity) > 4) {
+      this.buildAngle = vec2.vectorToAngle(this.velocity);
+    }
+
     if (this.isShot && this.tableTouchTime < 3 && vec3.magnitude(this.velocity) < MARBLE_STOP_THRESHOLD * 2) {
       if (this.type.includes('structure_')) {
-        let angle = vec2.vectorToAngle(this.velocity);
+        const angle = this.buildAngle ?? vec2.vectorToAngle(this.velocity);
 
         this.kill();
 
         const ph = game.getThing('table').physicsHandler;
-        
+
         const pos = [
           this.position[0],
           this.position[1],

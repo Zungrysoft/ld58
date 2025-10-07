@@ -15,7 +15,7 @@ const Material = CANNON.Material;
 const ContactMaterial = CANNON.ContactMaterial;
 const NaiveBroadphase = CANNON.NaiveBroadphase;
 
-const TABLE_RESTITUTION = 0.7;
+const TABLE_RESTITUTION = 0.05;
 const TABLE_FRICTION = 0.06;
 const MARBLE_RESTITUTION = 0.97;
 const MARBLE_FRICTION = 0.05;

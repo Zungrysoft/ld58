@@ -628,8 +628,8 @@ export default class Table extends Thing {
   }
 
   clearInventory() {
-    while (this.getActiveInventory().length > 1) {
-      this.getActiveInventory().splice(1, 1)
+    while (this.getActiveInventory().length > 0) {
+      this.getActiveInventory().splice(0, 1)
     }
     while (this.getActiveInventoryQueue().length > 0) {
       this.getActiveInventory().splice(0, 1)
