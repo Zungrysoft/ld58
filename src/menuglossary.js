@@ -45,7 +45,7 @@ export default class GlossaryMenu extends Menu {
       type: 'shock',
       title: 'Shockwave Marble',
       description: [
-        'Explodes whenever it collides with another marble at high speed.',
+        'Explodes whenever it collides with another marble.',
         'Great for scattering dense clusters of marbles!',
       ]
     },
@@ -53,7 +53,7 @@ export default class GlossaryMenu extends Menu {
       type: 'fire',
       title: 'Fire Marble',
       description: [
-        'Destroys any other marble it hits if it is moving fast enough.',
+        'Destroys any other marble it smacks into.',
         '(Goal Marbles are indestructible.)',
       ]
     },

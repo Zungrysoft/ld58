@@ -230,7 +230,6 @@ export default class Table extends Thing {
 
   addMarble(type, instantaneous) {
     this.gotMarble = true;
-    const isAiTurn = this.isSingleplayer && this.activePlayer !== 'p1';
 
     if (type === 'goal_p1') {
       if (game.getThings().filter(x => x instanceof Marble && !x.isDead && x.type === 'goal_p1').length === 0) {
@@ -244,7 +243,7 @@ export default class Table extends Thing {
         this.playerWin = 'p1';
       }
     }
-    else if (!(['evil'].includes(type)) && !isAiTurn) {
+    else if (!(['evil'].includes(type))) {
       if (instantaneous) {
         this.getActiveInventory().push(type);
         this.inventoryTrayMarbleCollectionTimers[this.getActiveInventory().length - 1] = COLLECTION_ANIMATION_DURATION;
@@ -255,18 +254,18 @@ export default class Table extends Thing {
       
     }
 
-    if (this.phase !== 'victory' && !isAiTurn /* && !instantaneous */) {
+    if (this.phase !== 'victory' /* && !instantaneous */) {
       game.addThing(new CollectedMarble(type, this.activePlayer === 'p1' ? 'right' : 'left'));
     }
   }
 
   deQueueMarbles() {
     // Return the shooter marble to the player's inventory
-    if (!(this.isSingleplayer && this.activePlayer === 'p2')) {
-      const shooterIndex = this.getActiveInventory().findIndex(x => x.includes('shooter'));
-      if (shooterIndex === -1) {
-        this.getActiveInventoryQueue().push('shooter_' + (this.activePlayer === 'p1' ? 'p1' : 'p2'));
-      }
+    const desiredShooters = this.isSingleplayer && this.activePlayer === 'p2' ? 2 : 1;
+    const foundShooters = this.getActiveInventory().filter(x => x.includes('shooter')).length;
+
+    for (let i = 0; i < desiredShooters - foundShooters; i ++) {
+      this.getActiveInventoryQueue().push('shooter_' + (this.activePlayer === 'p1' ? 'p1' : 'p2'));
     }
 
     while(this.getActiveInventoryQueue().length > 0) {
@@ -497,6 +496,7 @@ export default class Table extends Thing {
 
       if (this.activePlayer === 'p2' && this.isSingleplayer) {
         this.setPhase('ai');
+        this.pickedMarbleIndex = -1;
       }
       else {
         this.setPhase('picking');
@@ -505,7 +505,6 @@ export default class Table extends Thing {
   }
 
   updateAi() {
-
     if (this.phaseTime === 30) {
       for (let i = 0; i < 30; i ++) {
         // Decide what to do
@@ -535,8 +534,35 @@ export default class Table extends Thing {
           continue
         }
 
-        this.pickedMarbleIndex = Math.floor(Math.random() * this.getActiveInventory().length)
+        this.pickedMarbleIndex = Math.floor(Math.random() * this.getActiveInventory().length);
         
+        // For defensive play, prioritize using basic marbles and then shooter marbles
+        if (this.isDefensive) {
+
+          const structureMarbleIndex = this.getActiveInventory().findIndex(x => x.includes('structure'));
+          if (structureMarbleIndex !== -1 && Math.random() < 0.4) {
+            const basicMarbleIndex = this.getActiveInventory().findIndex(x => x === 'basic');
+            if (basicMarbleIndex !== -1) {
+              this.pickedMarbleIndex = basicMarbleIndex;
+            }
+            else {
+              const shooterMarbleIndex = this.getActiveInventory().findIndex(x => x.includes('shooter'));
+              if (shooterMarbleIndex !== -1) {
+                this.pickedMarbleIndex = shooterMarbleIndex;
+              }
+            }
+          }
+
+        }
+        // For offensive play, use special marbles more often
+        else {
+          if (Math.random() < 0.4) {
+            const specialMarbleIndex = this.getActiveInventory().findIndex(x => x !== 'basic' && !(x.includes('shooter') && !(x.includes('structure'))));
+            if (specialMarbleIndex !== -1) {
+              this.pickedMarbleIndex = specialMarbleIndex;
+            }
+          }
+        }
 
         // If this will put the marble closer to where we want it to go, do it.
         const dir = vec3.normalize(vec3.subtract(this.selectedShootTargetPosition, this.selectedShootPosition))
@@ -550,16 +576,13 @@ export default class Table extends Thing {
           // console.log(this.selectedShootTargetPosition, dir, willTakeMarbleFurther, this.isDefensive)
           break;
         }
-
-        
-        
       }
 
       this.noZoom = true
       soundmanager.playSound('place', 0.8, 1);
 
       // Add platform and marble
-      const pickedMarbleType = this.isDefensive ? this.getActiveInventory()[0] : this.getActiveInventory()[this.pickedMarbleIndex];
+      const pickedMarbleType = this.getActiveInventory()[this.pickedMarbleIndex];
       this.shootingPlatform = game.addThing(new Structure('platform', null, this.selectedShootPosition));
       this.shootingMarble = game.addThing(new Marble(pickedMarbleType, [...this.selectedShootPosition]), true);
       this.physicsHandler.addStructure(this.shootingPlatform);
@@ -579,6 +602,8 @@ export default class Table extends Thing {
       this.gotExtraMove = false;
       this.movesLeft --;
       this.waitUntilEndOfShot = 5;
+
+      this.getActiveInventory().splice(this.pickedMarbleIndex, 1);
 
       this.setPhase('shot');
     }
@@ -702,7 +727,7 @@ export default class Table extends Thing {
         })
       }
 
-      if (['positioning', 'shooting'].includes(this.phase) && i === this.pickedMarbleIndex) {
+      if (['positioning', 'shooting', 'ai'].includes(this.phase) && i === this.pickedMarbleIndex) {
         render.drawUIMesh({
           mesh: assets.meshes.pointer,
           texture: assets.textures.square,
