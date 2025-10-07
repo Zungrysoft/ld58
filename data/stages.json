@@ -159,7 +159,7 @@
             { "type": "shock", "position": [-3.8,6.7, 0] },
 
             { "type": "structure_ramp", "position": [-2.25, -8.85, 0] },
-            { "type": "metal", "position": [0, 0, 1] }
+            { "type": "metal", "position": [0, 0, 0.8] }
         ],
         "marbleCollection": [
             "plus_one",
