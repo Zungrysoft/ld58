@@ -261,7 +261,7 @@ export default class Marble extends Thing {
   shrink() {
     const ph = game.getThing('table').physicsHandler;
     if (ph) {
-      ph.removeStructure(this);
+      ph.removeMarble(this);
     }
     this.isShrinking = true;
   }
