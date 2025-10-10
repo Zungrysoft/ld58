@@ -632,7 +632,7 @@ export default class Table extends Thing {
       this.getActiveInventory().splice(0, 1)
     }
     while (this.getActiveInventoryQueue().length > 0) {
-      this.getActiveInventory().splice(0, 1)
+      this.getActiveInventoryQueue().splice(0, 1)
     }
   }
 
@@ -644,7 +644,7 @@ export default class Table extends Thing {
 
   cleanUp() {
     this.isDead = true
-    for (const thing of game.getThings().filter(x => x instanceof Marble || x instanceof Structure || x instanceof QuitButton)) {
+    for (const thing of game.getThings().filter(x => x instanceof Marble || x instanceof Structure || x instanceof QuitButton || x instanceof Announcement)) {
       thing.isDead = true;
     }
   }

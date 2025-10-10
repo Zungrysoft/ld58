@@ -289,6 +289,11 @@
             { "type": "basic", "position": [6, -3, 1.05] },
             { "type": "basic", "position": [6, -1, 1.05] },
 
+            { "type": "basic", "position": [7.5, -3.5, 1.05] },
+            { "type": "basic", "position": [7.5, -0.5, 1.05] },
+            { "type": "basic", "position": [4.5, -3.5, 1.05] },
+            { "type": "basic", "position": [4.5, -0.5, 1.05] },
+
             { "type": "goal_p2", "position": [0, 2, 1.05] },
             { "type": "basic", "position": [1, 2, 1.05] },
             { "type": "basic", "position": [-1, 2, 1.05] },
@@ -311,7 +316,6 @@
             { "type": "shock", "position": [0.85, -4.77, 1.05] },
             { "type": "shock", "position": [-0.56, 2.97, 1.05] },
             { "type": "shock", "position": [0, -8.5, 0] },
-            { "type": "shock", "position": [3, -8.5, 0] },
             { "type": "shock", "position": [-2.4, -0.4, 0] },
             { "type": "shock", "position": [-7.1, -8.9, 0] },
             { "type": "shock", "position": [-6.84, 3.3, 0] }
@@ -403,7 +407,11 @@
 
             { "type": "basic", "position": [-8.6, 2, 0] },
             { "type": "basic", "position": [-7, 2, 0] },
-            { "type": "goal_p2", "position": [-7.8, 2, 0] }
+            { "type": "goal_p2", "position": [-7.8, 2, 0] },
+            { "type": "basic", "position": [-8.6, 3, 0] },
+            { "type": "basic", "position": [-7, 3, 0] },
+            { "type": "basic", "position": [-8.6, 1, 0] },
+            { "type": "basic", "position": [-7, 1, 0] }
             
         ],
         "marbleCollection": [
